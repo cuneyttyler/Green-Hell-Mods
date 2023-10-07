@@ -1,0 +1,6 @@
+D:\Programs\modapi\projects\GH\ModifyNutritionRate\Mod\ModifyNutritionRate.dll
+D:\Programs\modapi\projects\GH\ModifyNutritionRate\Mod\ModifyNutritionRate.pdb
+D:\Programs\modapi\projects\GH\ModifyNutritionRate\obj\x86\Release\ModifyNutritionRate.csproj.AssemblyReference.cache
+D:\Programs\modapi\projects\GH\ModifyNutritionRate\obj\x86\Release\ModifyNutritionRate.csproj.CoreCompileInputs.cache
+D:\Programs\modapi\projects\GH\ModifyNutritionRate\obj\x86\Release\ModifyNutritionRate.dll
+D:\Programs\modapi\projects\GH\ModifyNutritionRate\obj\x86\Release\ModifyNutritionRate.pdb

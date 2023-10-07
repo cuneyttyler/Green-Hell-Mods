@@ -1,0 +1,10 @@
+<Mod ID="ModifyNutritionRate">
+  <Compatible>2.5.2</Compatible>
+  <Name>
+    <EN>ModifyNutritionRate</EN>
+  </Name>
+  <Description>
+    <EN>ModifyNutritionRate</EN>
+  </Description>
+  <Version>1.0.0.1</Version>
+</Mod>

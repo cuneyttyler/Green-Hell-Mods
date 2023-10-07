@@ -1,0 +1,6 @@
+D:\Programs\modapi\projects\GH\SpiritualWarfare\Mod\SpiritualWarfare.dll
+D:\Programs\modapi\projects\GH\SpiritualWarfare\Mod\SpiritualWarfare.pdb
+D:\Programs\modapi\projects\GH\SpiritualWarfare\obj\x86\Release\SpiritualWarfare.csproj.AssemblyReference.cache
+D:\Programs\modapi\projects\GH\SpiritualWarfare\obj\x86\Release\SpiritualWarfare.csproj.CoreCompileInputs.cache
+D:\Programs\modapi\projects\GH\SpiritualWarfare\obj\x86\Release\SpiritualWarfare.dll
+D:\Programs\modapi\projects\GH\SpiritualWarfare\obj\x86\Release\SpiritualWarfare.pdb

@@ -1,0 +1,6 @@
+D:\Programs\modapi\projects\GH\ModifyTimeSpeed\Mod\ModifyTimeSpeed.dll
+D:\Programs\modapi\projects\GH\ModifyTimeSpeed\Mod\ModifyTimeSpeed.pdb
+D:\Programs\modapi\projects\GH\ModifyTimeSpeed\obj\x86\Release\ModifyTimeSpeed.csproj.AssemblyReference.cache
+D:\Programs\modapi\projects\GH\ModifyTimeSpeed\obj\x86\Release\ModifyTimeSpeed.csproj.CoreCompileInputs.cache
+D:\Programs\modapi\projects\GH\ModifyTimeSpeed\obj\x86\Release\ModifyTimeSpeed.dll
+D:\Programs\modapi\projects\GH\ModifyTimeSpeed\obj\x86\Release\ModifyTimeSpeed.pdb

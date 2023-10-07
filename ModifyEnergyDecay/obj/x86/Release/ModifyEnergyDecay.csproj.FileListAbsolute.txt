@@ -1,0 +1,6 @@
+D:\Programs\modapi\projects\GH\ModifyEnergyDecay\Mod\ModifyEnergyDecay.dll
+D:\Programs\modapi\projects\GH\ModifyEnergyDecay\Mod\ModifyEnergyDecay.pdb
+D:\Programs\modapi\projects\GH\ModifyEnergyDecay\obj\x86\Release\ModifyEnergyDecay.csproj.AssemblyReference.cache
+D:\Programs\modapi\projects\GH\ModifyEnergyDecay\obj\x86\Release\ModifyEnergyDecay.csproj.CoreCompileInputs.cache
+D:\Programs\modapi\projects\GH\ModifyEnergyDecay\obj\x86\Release\ModifyEnergyDecay.dll
+D:\Programs\modapi\projects\GH\ModifyEnergyDecay\obj\x86\Release\ModifyEnergyDecay.pdb
