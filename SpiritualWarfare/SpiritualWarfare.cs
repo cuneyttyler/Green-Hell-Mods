@@ -1,8 +1,10 @@
 ﻿using DG.Tweening.Plugins.Core.PathCore;
+using Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using static RootMotion.FinalIK.AimPoser;
 
 namespace SpiritualWarfare
 {
@@ -11,7 +13,7 @@ namespace SpiritualWarfare
         protected override void Start()
         {
             base.Start();
-
+            
             Logger.Log("Initializing...");
 
             if (SpiritualWarfare.Instance == null)
@@ -32,6 +34,7 @@ namespace SpiritualWarfare
         private static AssetBundle ASSET_BUNDLE;
         public static List<TransformData> transformData = new List<TransformData>();
         private List<GameObject> totemObjects = new List<GameObject> ();
+        public static bool isLastActionDestroy = false;
 
         public static SpiritualWarfare Get()
         {
@@ -42,8 +45,9 @@ namespace SpiritualWarfare
         {
             try
             {
+                InitData();
                 LoadAssetBundle();
-                transformData = FileUtil.ReadTransformData();
+                FileUtil.ReadTransformData();
                 InitializeObjects();
             }
             catch (Exception e)
@@ -51,6 +55,12 @@ namespace SpiritualWarfare
                 Logger.LogError(e.ToString());
             }
         }
+
+        void InitData()
+        {
+            transformData = new List<TransformData>();
+            totemObjects = new List<GameObject>();
+    }
 
         void LoadAssetBundle()
         {
@@ -77,6 +87,7 @@ namespace SpiritualWarfare
 
         private void InitializeObjects()
         {
+            Logger.Log("Initializing objects.");
             Logger.Log("Building previously built totems." + transformData.Count + " in total.");
             foreach(TransformData transformData in transformData)
             {
@@ -94,18 +105,26 @@ namespace SpiritualWarfare
         {
             try
             {
-                if (Input.GetKeyDown(KeyCode.T))
+                if (Input.GetKeyDown(KeyCode.T) || Input.GetKeyDown(KeyCode.JoystickButton5))
                 {
-                    BuildTotem(SpiritualWarfare.CROSS_RESOURCE_ID);
-                    PlayMusic(CROSS_CHOIR_RESOURCE_ID);
+                    Item currentItem = Player.Get().GetCurrentItem(Enums.Hand.Right);
+                    if (currentItem.GetInfoID() == Enums.ItemID.Log) 
+                    {
+                        Logger.Log("Building totem.");
+                        DropAndDestroyLog(currentItem);
+                        BuildTotem(SpiritualWarfare.CROSS_RESOURCE_ID);
+                        PlaySound(CROSS_CHOIR_RESOURCE_ID);
+                        Logger.Log("Totem built.");
+
+                    }
                 }
-                if (Input.GetKeyDown(KeyCode.P))
+                if (Input.GetKeyDown(KeyCode.L) || (Input.GetKeyDown(KeyCode.JoystickButton0) && Input.GetKeyDown(KeyCode.JoystickButton3)))
                 {
                     RevertLastBuild();
                 }
-                if (Input.GetKeyDown(KeyCode.Y))
+                if (Input.GetKeyDown(KeyCode.Y) || (Input.GetKeyDown(KeyCode.JoystickButton5)) && Input.GetKeyDown(KeyCode.JoystickButton3))
                 {
-                    PlayMusic(SALVATION_RESOURCE_ID);
+                    PlaySound(SALVATION_RESOURCE_ID);
                 }
             }
             catch (Exception e)
@@ -126,47 +145,69 @@ namespace SpiritualWarfare
             }
 
             Logger.Log("Prefab successfully loaded. Building totem.");
-            if(transform != null)
-            {
-                Logger.Log("Transform: " + transform.ToString());
-            }
 
             Vector3 position = transform != null ? transform.position : CalculatePosition();
-            Quaternion rotation = transform != null ? transform.rotation : Quaternion.Euler(-90, -180, -90);
+
+            Quaternion rotation = Player.Get().transform.rotation;
+            rotation.eulerAngles = new Vector3(-90, rotation.eulerAngles.y - 90, rotation.eulerAngles.z - 90);
+            rotation = transform != null ? transform.rotation : rotation;
 
             ConstructionGhost ghostComponent = prefab.AddComponent<ConstructionGhost>();
             prefab = UnityEngine.Object.Instantiate<GameObject>(prefab, position, rotation);
 
-            Logger.Log("Totem built.");
-            transformData.Add(new TransformData(position, rotation, new Vector3()));
+            if(write)
+            {
+                transformData.Add(new TransformData(position, rotation, new Vector3()));
+            }
+
             totemObjects.Add(prefab);
+
+            isLastActionDestroy = false;
         }
 
-        Vector3 CalculatePosition()
+        void DropAndDestroyLog(Item log)
+        {
+            Logger.Log("Dropping log and removing.");
+            Player.Get().DropItem(log);
+            UnityEngine.Object.Destroy(log.gameObject);
+        }
+
+        Vector3 CalculatePosition(float heightOffset = 0.63f)
         {
             float distanceInFront = 2.0f;
-            float heightOffset = 1.0f;
 
             Vector3 playerPosition = Player.Get().transform.position;
             Vector3 playerForward = Player.Get().transform.forward;
 
             // Calculate the position in front of the player
-            Vector3 spawnPosition = playerPosition + playerForward * distanceInFront + Vector3.up * heightOffset;
+            Vector3 spawnPosition = new Vector3(playerPosition.x, 0, playerPosition.z) + playerForward * distanceInFront + Vector3.up * heightOffset;
+
+            spawnPosition += Vector3.up * MainLevel.GetTerrainY(spawnPosition);
 
             return spawnPosition;
         }
 
         void RevertLastBuild()
         {
+            if(isLastActionDestroy == true)
+            {
+                return;
+            }
+            isLastActionDestroy = true;
+
             Logger.Log("Reverting last built totem.");
             if(totemObjects.Count > 0)
             {
+                TransformData data = transformData[transformData.Count - 1];
+
                 UnityEngine.Object.Destroy(totemObjects[totemObjects.Count - 1]);
                 transformData.RemoveAt(transformData.Count - 1);
+
+                ItemsManager.Get().CreateItem(ItemID.Log, false, data.position, Quaternion.identity, false);
             }
         }
 
-        void PlayMusic(String path)
+        void PlaySound(String path)
         {
             Logger.Log("Loading music - " + path);
             AudioClip audioClip = Load<AudioClip>(path);
@@ -176,6 +217,7 @@ namespace SpiritualWarfare
                 return;
             }
             Logger.Log("Music loaded. Playing...");
+            PlayerAudioModule.Get().StopSound(audioClip);
             PlayerAudioModule.Get().PlaySound(audioClip);
         }
 
@@ -190,52 +232,57 @@ namespace SpiritualWarfare
     {
         private static string FILE_NAME = "transform_data";
 
-        public static List<TransformData> ReadTransformData()
+        public static void ReadTransformData()
         {
-            List<TransformData> transformData = new List<TransformData>();
-
             Logger.Log("Loading save " + SaveGame.s_MainSaveName);
+
+            string folderPath = System.IO.Path.Combine(Application.persistentDataPath, "SpiritualWarfareData");
 
             int start = SaveGame.SP_SLOT_NAME.Length;
             int length = SaveGame.s_MainSaveName.LastIndexOf(".") - start;
             string slotId = SaveGame.s_MainSaveName.Substring(start, length);
-            for (int k = 0; k < 400; k++)
-            {
-                string save_file_name = FILE_NAME + "_" + slotId + "_" + (k++) + ".sav";
-                if (GreenHellGame.Instance.m_RemoteStorage.FileExistsInRemoteStorage(save_file_name))
-                {
-                    GreenHellGame.Instance.m_RemoteStorage.FileDelete(save_file_name);
-                    string json = System.Text.Encoding.ASCII.GetString(System.Text.Encoding.UTF8.GetBytes(save_file_name));
-                    transformData.Add(JsonUtility.FromJson<TransformData>(json));
-                }
-            }
+            folderPath = System.IO.Path.Combine(folderPath, slotId);
 
-            return transformData;
+            string[] files = Directory.GetFiles(folderPath, "*.json", SearchOption.AllDirectories);
+            foreach (string filePath in files)
+            {
+                string json = File.ReadAllText(filePath);
+                SpiritualWarfare.transformData.Add(JsonUtility.FromJson<TransformData>(json));
+            }
         }
-        
+
         public static void writeTransformData(int slotId)
         {
-            Logger.Log("Cleaning up old data for slot " + slotId);
-            for (int j = 0; j < 4; j++)
+            Logger.Log("Saving data.");
+
+            string folderPath = System.IO.Path.Combine(Application.persistentDataPath, "SpiritualWarfareData");
+            if (!Directory.Exists(folderPath))
             {
-                for(int k = 0; k < 400; k++)
+                try
                 {
-                    string save_file_name = FILE_NAME + "_" + j + "_" + (k++) + ".sav";
-                    if (GreenHellGame.Instance.m_RemoteStorage.FileExistsInRemoteStorage(save_file_name))
-                    {
-                        GreenHellGame.Instance.m_RemoteStorage.FileDelete(save_file_name);
-                    }
+                    Directory.CreateDirectory(folderPath);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError("Exception when creating directory - " + folderPath);
                 }
             }
 
-            Logger.Log("Writing transform data for slot " + slotId);
+            string slotFolderPath = System.IO.Path.Combine(folderPath, slotId + "");
+            Logger.Log("Removing old slot backup directory and recreating - " + slotFolderPath);
+            if (Directory.Exists(slotFolderPath))
+            {
+                Directory.Delete(slotFolderPath, true);
+            }
+            Directory.CreateDirectory(slotFolderPath);
+
+            Logger.Log("Writing data to files.");
             int i = 0;
             foreach (TransformData data in SpiritualWarfare.transformData)
             {
                 string json = JsonUtility.ToJson(data);
-                string save_file_name = FILE_NAME + "_" + slotId + "_" + (i++) + ".sav";
-                Logger.Log("Saving file " + save_file_name + ".");
-                GreenHellGame.Instance.m_RemoteStorage.FileWrite(save_file_name, System.Text.Encoding.ASCII.GetBytes(json));
+                string filePath = System.IO.Path.Combine(slotFolderPath, "transform_data_" + slotId + "_" + (i++) + ".json");
+                File.WriteAllText(filePath, json);
             }
         }
     }

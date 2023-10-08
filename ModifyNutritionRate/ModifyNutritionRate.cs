@@ -94,7 +94,7 @@ namespace ModifyNutritionRate
             Log("CarboIncrease = " + carboIncrease);
 
             m_NeedCarbo = (1f - carboPercentage) * 100 + carboIncrease;
-            m_NeedCarbo = Mathf.Clamp(this.m_NeedCarbo, 0f, GetMaxNutritionCarbo());
+            m_NeedCarbo = Mathf.Clamp(this.m_NeedCarbo, 0f, GetMaxCarboNeed());
 
             Log("m_NutritionCarbo = " + m_NutritionCarbo);
             Log("m_NeedCarbo = " + m_NeedCarbo);
@@ -107,7 +107,7 @@ namespace ModifyNutritionRate
             Log("fatIncrease = " + fatIncrease);
 
             m_NeedFat = (1f - fatPercentage) * 100 + fatIncrease + carboIncrease * fatCarboIncreaseFactor;
-            m_NeedFat = Mathf.Clamp(this.m_NeedFat, 0f, GetMaxNutritionFat());
+            m_NeedFat = Mathf.Clamp(this.m_NeedFat, 0f, GetMaxFatNeed());
 
             Log("m_NutritionFat = " + m_NutritionFat);
             Log("m_NeedFat = " + m_NeedFat);
@@ -119,7 +119,7 @@ namespace ModifyNutritionRate
             Log("proteinIncrease = " + proteinIncrease);
 
             m_NeedProteins = (1f - proteinPercentage) * 100 + proteinIncrease + fatIncrease * proteinFatIncreaseFactor + carboIncrease * proteinCarboIncreaseFactor;
-            m_NeedProteins = Mathf.Clamp(this.m_NeedProteins, 0f, GetMaxNutritionProtein());
+            m_NeedProteins = Mathf.Clamp(this.m_NeedProteins, 0f, GetMaxProteinNeed());
 
             Log("m_NutritionProteins = " + m_NutritionProteins);
             Log("m_NeedProteins = " + m_NeedProteins);
@@ -151,9 +151,10 @@ namespace ModifyNutritionRate
             float nutritionIncrease = 0.15f * (nutritionPercentage) * 100;
 
             Log("NutritionIncrease = " + nutritionIncrease);
+            Log("hydrationPercentage = " + hydrationPercentage);
 
-            m_NeedHydration = (1f - hydrationPercentage) * 100 + nutritionIncrease;
-            m_NeedHydration = Mathf.Clamp(this.m_NeedHydration, 0f, GetMaxHydration());
+            m_NeedHydration = hydrationPercentage > 0.9f ? (1f - hydrationPercentage) * 100 : (1f - hydrationPercentage) * 100 + nutritionIncrease;
+            m_NeedHydration = Mathf.Clamp(this.m_NeedHydration, 0f, GetMaxHydrationNeed());
 
             Log("m_Hydration = " + m_Hydration);
             Log("m_NeedHydration = " + m_NeedHydration);
