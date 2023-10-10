@@ -1,0 +1,10 @@
+<Mod ID="SmallTrapDestroyAnimal">
+  <Compatible>2.5.2</Compatible>
+  <Name>
+    <EN>SmallTrapDestroyAnimal</EN>
+  </Name>
+  <Description>
+    <EN>SmallTrapDestroyAnimal</EN>
+  </Description>
+  <Version>1.0.0.1</Version>
+</Mod>

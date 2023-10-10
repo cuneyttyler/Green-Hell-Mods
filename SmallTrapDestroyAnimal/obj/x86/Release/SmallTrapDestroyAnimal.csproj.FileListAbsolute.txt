@@ -1,0 +1,6 @@
+D:\Programs\modapi\projects\GH\SmallTrapDestroyAnimal\Mod\SmallTrapDestroyAnimal.dll
+D:\Programs\modapi\projects\GH\SmallTrapDestroyAnimal\Mod\SmallTrapDestroyAnimal.pdb
+D:\Programs\modapi\projects\GH\SmallTrapDestroyAnimal\obj\x86\Release\SmallTrapDestroyAnimal.csproj.AssemblyReference.cache
+D:\Programs\modapi\projects\GH\SmallTrapDestroyAnimal\obj\x86\Release\SmallTrapDestroyAnimal.csproj.CoreCompileInputs.cache
+D:\Programs\modapi\projects\GH\SmallTrapDestroyAnimal\obj\x86\Release\SmallTrapDestroyAnimal.dll
+D:\Programs\modapi\projects\GH\SmallTrapDestroyAnimal\obj\x86\Release\SmallTrapDestroyAnimal.pdb

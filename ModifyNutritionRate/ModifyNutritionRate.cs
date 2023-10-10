@@ -16,76 +16,121 @@ namespace ModifyNutritionRate
         private float m_NeedFat;
         private float m_NeedProteins;
         private float m_NeedHydration;
-        private float m_CarboDecrease = 0f;
-        private float m_FatDecrease = 0f;
-        private float m_ProteinsDecrease = 0f;
-        private float m_HydrationDecrease = 0f;
+        private float m_CarboDecrease;
+        private float m_FatDecrease;
+        private float m_ProteinsDecrease;
+        private float m_HydrationDecrease;
+        private float m_CarboFactor;
+        private float m_FatFactor;
+        private float m_ProteinsFactor;
+        private float m_HydrationFactor;
+        private float m_fatCarboIncreaseFactor;
+        private float m_proteinFatIncreaseFactor;
+        private float m_proteinCarboIncreaseFactor;
+        private float m_MaxHydrationDecreaseFactor;
+
+        public override void Initialize(Being being)
+        {
+            base.Initialize(being);
+
+            m_MaxHydrationDecreaseFactor = 4f;
+
+            m_MaxHydration /= m_MaxHydrationDecreaseFactor;
+            m_HydrationConsumptionPerSecond /= (m_MaxHydrationDecreaseFactor * 1.5f);
+            m_HydrationConsumptionRunMul /= (m_MaxHydrationDecreaseFactor * 1.5f);
+            m_HydrationConsumptionDuringFeverPerSecond /= (m_MaxHydrationDecreaseFactor * 1.5f);
+
+            m_fatCarboIncreaseFactor = 0.5f;
+            m_proteinFatIncreaseFactor = 0.25f;
+            m_proteinCarboIncreaseFactor = 0.25f;
+
+            m_CarboFactor = 0.1f;
+            m_FatFactor = 0.08f;
+            m_ProteinsFactor = 0.08f;
+            m_HydrationFactor = 0.08f;
+
+            Log("m_MaxHydration: " + m_MaxHydration);
+            Log("m_HydrationConsumptionPerSecond: " + m_HydrationConsumptionPerSecond);
+            Log("m_HydrationConsumptionRunMul: " + m_HydrationConsumptionRunMul);
+            Log("m_HydrationConsumptionDuringFeverPerSecond: " + m_HydrationConsumptionDuringFeverPerSecond);
+            Log("Initialized.");
+    }
 
         protected override void UpdateNutrition()
         {
             base.UpdateNutrition();
 
-            float m_CarboFactor = 1f;
-            float m_FatFactor = 0.66f;
-            float m_ProteinsFactor = 0.33f;
-            float m_CarboSpeedFactor = 0.25f;
-            float m_FatSpeedFactor = 0.25f;
-            float m_ProteinSpeedsFactor = 0.25f;
-
-            float carboFactor = m_CarboFactor * m_CarboSpeedFactor;
-            float fatFactor = m_FatFactor * m_FatSpeedFactor;
-            float proteinsFactor = m_ProteinsFactor * m_ProteinSpeedsFactor;
-
-            if(m_NutritionCarbo > CalculatePercentageValue(m_MaxNutritionCarbo, 60)) {
-                m_CarboDecrease = m_NutritionCarbohydratesConsumptionPerSecond * carboFactor;
-                m_FatDecrease = m_NutritionFatConsumptionPerSecond * fatFactor;
-                m_ProteinsDecrease = m_NutritionProteinsConsumptionPerSecond * proteinsFactor;
-
-            } else if (m_NutritionCarbo > CalculatePercentageValue(m_MaxNutritionCarbo, 30))
+            try
             {
-                m_CarboDecrease = m_NutritionCarbohydratesConsumptionPerSecond * carboFactor * 0.66f;
-                
-                if(m_NutritionFat > CalculatePercentageValue(m_MaxNutritionFat,30))
+                if (m_NutritionCarbo > CalculatePercentageValue(m_MaxNutritionCarbo, 60))
                 {
-                    m_FatDecrease = m_NutritionFatConsumptionPerSecond * fatFactor;
-                } else
-                {
-                    m_FatDecrease = m_NutritionFatConsumptionPerSecond * fatFactor * 0.5f;
+                    m_CarboDecrease = m_NutritionCarbohydratesConsumptionPerSecond * m_CarboFactor;
+                    m_FatDecrease = m_NutritionFatConsumptionPerSecond * m_FatFactor;
+                    m_ProteinsDecrease = m_NutritionProteinsConsumptionPerSecond * m_ProteinsFactor;
+
                 }
-
-                m_ProteinsDecrease = m_NutritionProteinsConsumptionPerSecond * proteinsFactor;
-            } else if (m_NutritionCarbo >= 0)
-            {
-                m_CarboDecrease = m_NutritionCarbohydratesConsumptionPerSecond * carboFactor * 0.33f;
-
-                if (m_NutritionFat > CalculatePercentageValue(m_MaxNutritionFat,30))
+                else if (m_NutritionCarbo > CalculatePercentageValue(m_MaxNutritionCarbo, 30))
                 {
-                    m_FatDecrease = m_NutritionFatConsumptionPerSecond * fatFactor;
-                    m_ProteinsDecrease = m_NutritionProteinsConsumptionPerSecond * proteinsFactor * 2;
+                    m_CarboDecrease = m_NutritionCarbohydratesConsumptionPerSecond * m_CarboFactor * 0.66f;
+
+                    if (m_NutritionFat > CalculatePercentageValue(m_MaxNutritionFat, 30))
+                    {
+                        m_FatDecrease = m_NutritionFatConsumptionPerSecond * m_FatFactor;
+                    }
+                    else
+                    {
+                        m_FatDecrease = m_NutritionFatConsumptionPerSecond * m_FatFactor * 0.5f;
+                    }
+
+                    m_ProteinsDecrease = m_NutritionProteinsConsumptionPerSecond * m_ProteinsFactor;
+                }
+                else if (m_NutritionCarbo >= 0)
+                {
+                    m_CarboDecrease = m_NutritionCarbohydratesConsumptionPerSecond * m_CarboFactor * 0.33f;
+
+                    if (m_NutritionFat > CalculatePercentageValue(m_MaxNutritionFat, 30))
+                    {
+                        m_FatDecrease = m_NutritionFatConsumptionPerSecond * m_FatFactor;
+                        m_ProteinsDecrease = m_NutritionProteinsConsumptionPerSecond * m_ProteinsFactor * 2;
+                    }
+                    else
+                    {
+                        m_FatDecrease = m_NutritionFatConsumptionPerSecond * m_FatFactor * 0.5f;
+                        m_ProteinsDecrease = m_NutritionProteinsConsumptionPerSecond * m_ProteinsFactor;
+                    }
                 }
                 else
                 {
-                    m_FatDecrease = m_NutritionFatConsumptionPerSecond * fatFactor * 0.5f;
-                    m_ProteinsDecrease = m_NutritionProteinsConsumptionPerSecond * proteinsFactor;
+                    m_CarboDecrease = 0f;
+                    m_FatDecrease = 0f;
+                    m_ProteinsDecrease = 0f;
                 }
+
+                m_NutritionCarbo -= m_CarboDecrease;
+                m_NutritionFat -= m_FatDecrease;
+                m_NutritionProteins -= m_ProteinsDecrease;
+
+                m_NutritionCarbo = Mathf.Clamp(this.m_NutritionCarbo, 0f, GetMaxNutritionCarbo());
+                m_NutritionFat = Mathf.Clamp(this.m_NutritionFat, 0f, GetMaxNutritionFat());
+                m_NutritionProteins = Mathf.Clamp(this.m_NutritionProteins, 0f, GetMaxNutritionProtein());
+
+
+                CalculateNutritionNeeds();
+            } catch(Exception e)
+            {
+                Log(e.ToString());
             }
-
-            m_NutritionCarbo -= m_CarboDecrease;
-            m_NutritionFat -= m_FatDecrease;
-            m_NutritionProteins -= m_ProteinsDecrease;
-
-            m_NutritionCarbo = Mathf.Clamp(this.m_NutritionCarbo, 0f, GetMaxNutritionCarbo());
-            m_NutritionFat = Mathf.Clamp(this.m_NutritionFat, 0f, GetMaxNutritionFat());
-            m_NutritionProteins = Mathf.Clamp(this.m_NutritionProteins, 0f, GetMaxNutritionProtein());
-
-
-            CalculateNutritionNeeds();
         }
 
         private void CalculateNutritionNeeds()
         {
-            float fatCarboIncreaseFactor = 0.5f, proteinFatIncreaseFactor = 0.25f, proteinCarboIncreaseFactor = 0.25f;
+            float carboIncrease = CalculateCarboNeed();
+            float fatIncrease = CalculateFatNeed(carboIncrease);
+            CalculateProteinsNeed(carboIncrease, fatIncrease);    
+        }
 
+        float CalculateCarboNeed()
+        {
             Log("Calculating carbohydrate need...");
 
             float carboPercentage = GetNutritionPercentage(0);
@@ -99,6 +144,11 @@ namespace ModifyNutritionRate
             Log("m_NutritionCarbo = " + m_NutritionCarbo);
             Log("m_NeedCarbo = " + m_NeedCarbo);
 
+            return carboIncrease;
+        }
+
+        float CalculateFatNeed(float carboIncrease)
+        {
             Log("Calculating fat need...");
 
             float fatPercentage = GetNutritionPercentage(1);
@@ -106,19 +156,24 @@ namespace ModifyNutritionRate
 
             Log("fatIncrease = " + fatIncrease);
 
-            m_NeedFat = (1f - fatPercentage) * 100 + fatIncrease + carboIncrease * fatCarboIncreaseFactor;
+            m_NeedFat = (1f - fatPercentage) * 100 + fatIncrease + carboIncrease * m_fatCarboIncreaseFactor;
             m_NeedFat = Mathf.Clamp(this.m_NeedFat, 0f, GetMaxFatNeed());
 
             Log("m_NutritionFat = " + m_NutritionFat);
             Log("m_NeedFat = " + m_NeedFat);
 
+            return fatIncrease;
+        }
+
+        void CalculateProteinsNeed(float carboIncrease, float fatIncrease)
+        {
             Log("Calculating proteins need...");
             float proteinPercentage = GetNutritionPercentage(1);
             float proteinIncrease = 0.15f * (1f - proteinPercentage) * 100;
 
             Log("proteinIncrease = " + proteinIncrease);
 
-            m_NeedProteins = (1f - proteinPercentage) * 100 + proteinIncrease + fatIncrease * proteinFatIncreaseFactor + carboIncrease * proteinCarboIncreaseFactor;
+            m_NeedProteins = (1f - proteinPercentage) * 100 + proteinIncrease + fatIncrease * m_proteinFatIncreaseFactor + carboIncrease * m_proteinCarboIncreaseFactor;
             m_NeedProteins = Mathf.Clamp(this.m_NeedProteins, 0f, GetMaxProteinNeed());
 
             Log("m_NutritionProteins = " + m_NutritionProteins);
@@ -129,16 +184,19 @@ namespace ModifyNutritionRate
         {
             base.UpdateHydration();
 
-            float m_HydrationSpeedFactor = 0.15f;
-            float m_HydrationFactor = GetNutritionPercentage();
+            try { 
+                float nutritionPercentage = GetNutritionPercentage();
 
-            float hydrationFactor = m_HydrationFactor * m_HydrationSpeedFactor;
+                m_HydrationDecrease = m_HydrationConsumptionPerSecond * nutritionPercentage * m_HydrationFactor;
+                m_Hydration -= m_HydrationDecrease;
+                m_Hydration = Mathf.Clamp(this.m_Hydration, 0f, GetMaxHydration());
 
-            m_HydrationDecrease = m_HydrationConsumptionPerSecond * hydrationFactor;
-            m_Hydration -= m_HydrationDecrease;
-            m_Hydration = Mathf.Clamp(this.m_Hydration, 0f, GetMaxHydration());
-
-            CalculateHydrationNeed();
+                CalculateHydrationNeed();
+            }
+            catch (Exception e)
+            {
+                Log(e.ToString());
+            }
         }
 
         private void CalculateHydrationNeed()
@@ -158,6 +216,12 @@ namespace ModifyNutritionRate
 
             Log("m_Hydration = " + m_Hydration);
             Log("m_NeedHydration = " + m_NeedHydration);
+        }
+
+        protected override void UpdateMaxHP()
+        {
+            this.m_MaxHP = this.m_Hydration * 0.25f * this.m_MaxHydrationDecreaseFactor + this.m_NutritionFat * 0.25f + this.m_NutritionCarbo * 0.25f + this.m_NutritionProteins * 0.25f;
+            this.m_MaxHP = Mathf.Clamp(this.m_MaxHP, 0f, 100f);
         }
 
         private float GetNutritionPercentage(int type)
@@ -249,7 +313,8 @@ namespace ModifyNutritionRate
 
         private void Log(string log)
         {
-            //CJDebug.Log(log);
+            //CJDebug.Log("ModifyNutritionRate: " + log);
+            ModAPI.Log.Write("ModifyNutritionRate: " + log);
         }
     }
 
@@ -263,7 +328,7 @@ namespace ModifyNutritionRate
 
             ModifyNutritionRate modifyNutritionRate = (ModifyNutritionRate)ModifyNutritionRate.Get();
 
-            float sleepCarboSpeedFactor = 1f, sleepFatSpeedFactor = 50f, sleepProteinsSpeedFactor = 50f, sleepHydrationSpeedFactor = 50f;
+            float sleepCarboSpeedFactor = 1f, sleepFatSpeedFactor = 30f, sleepProteinsSpeedFactor = 30f, sleepHydrationSpeedFactor = 0.3f;
 
             CJDebug.Log("" + modifyNutritionRate.GetProteinsDecrease() * sleepProteinsSpeedFactor);
 
@@ -273,8 +338,8 @@ namespace ModifyNutritionRate
             modifyNutritionRate.m_NutritionFat = Mathf.Clamp(modifyNutritionRate.m_NutritionFat, 0f, modifyNutritionRate.GetMaxNutritionFat());
             modifyNutritionRate.m_NutritionProteins -= modifyNutritionRate.GetProteinsDecrease() * sleepProteinsSpeedFactor;
             modifyNutritionRate.m_NutritionProteins = Mathf.Clamp(modifyNutritionRate.m_NutritionProteins, 0f, modifyNutritionRate.GetMaxNutritionProtein());
-            modifyNutritionRate.m_Hydration -= modifyNutritionRate.GetHydrationDecrease() * sleepHydrationSpeedFactor;
-            modifyNutritionRate.m_Hydration = Mathf.Clamp(modifyNutritionRate.m_Hydration, 0f, modifyNutritionRate.GetMaxHydration());
+            //modifyNutritionRate.m_Hydration -= modifyNutritionRate.GetHydrationDecrease() * sleepHydrationSpeedFactor;
+            //modifyNutritionRate.m_Hydration = Mathf.Clamp(modifyNutritionRate.m_Hydration, 0f, modifyNutritionRate.GetMaxHydration());
         }
     }
 
@@ -298,6 +363,38 @@ namespace ModifyNutritionRate
                 float fillAmount4 = modifyNutritionRate.GetHydrationNeed() / modifyNutritionRate.GetMaxHydrationNeed();
                 watchMacronutrientsData.m_Hydration.fillAmount = fillAmount4;
             }
+        }
+    }
+
+    public class RemindersManagerExtended : RemindersManager
+    {
+        protected override void CheckWater()
+        {
+            if (Time.time < this.m_NextCheckWaterTime)
+            {
+                return;
+            }
+            if (PlayerConditionModule.Get().GetHydration() >= (PlayerConditionModule.Get().GetMaxHydration() / 4f))
+            {
+                this.m_NextCheckWaterTime = Time.time + 5f;
+                return;
+            }
+            if (DialogsManager.Get().IsAnyDialogPlaying())
+            {
+                this.m_NextCheckWaterTime = Time.time + 60f;
+                return;
+            }
+            DialogsManager.Get().StartDialog(this.m_LowWaterDialogs[this.m_CheckWaterIndex]);
+            if (this.m_CheckWaterIndex == 0)
+            {
+                HintsManager.Get().ShowHint(this.m_LowWaterHint, 10f);
+            }
+            this.m_CheckWaterIndex++;
+            if (this.m_CheckWaterIndex >= this.m_LowWaterDialogs.Length)
+            {
+                this.m_CheckWaterIndex = 0;
+            }
+            this.m_NextCheckWaterTime = Time.time + 120f;
         }
     }
 }
