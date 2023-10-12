@@ -15,6 +15,7 @@ namespace SmallTrapDestroyAnimal
         public override void OnExecute(TriggerAction.TYPE action)
         {
             AI.AIID id = this.m_AI.m_ID;
+
             Item item = ItemsManager.Get().CreateItem(id.ToString() + "_Body", false);
             if (id == AI.AIID.PoisonDartFrog)
             {
@@ -26,7 +27,7 @@ namespace SmallTrapDestroyAnimal
                 }
                 item.ApplyMaterial(material);
             }
-            if(id != AI.AIID.GoliathBirdEater && id != AI.AIID.Scorpion && id != AI.AIID.CaneToad
+            if (id != AI.AIID.GoliathBirdEater && id != AI.AIID.Scorpion && id != AI.AIID.CaneToad
                 && id != AI.AIID.BrasilianWanderingSpider && id != AI.AIID.Mouse)
             {
                 if (!item.Take(true))
@@ -34,14 +35,17 @@ namespace SmallTrapDestroyAnimal
                     Inventory3DManager.Get().DropItem(item);
                 }
                 AchievementsManager.OnAchivementEvent(AchivementsEvent.TrapHarvested, false);
+
+                if (!this.m_AI.ReplIsOwner())
+                {
+                    this.m_AI.ReplRequestOwnership(false);
+                }
             }
 
-            if (!this.m_AI.ReplIsOwner())
-            {
-                this.m_AI.ReplRequestOwnership(false);
-            }
             UnityEngine.Object.Destroy(this.m_AI.gameObject);
+            UnityEngine.Object.Destroy(this.GetComponent<AudioClip>());
             this.m_AI = null;
+            this.m_PlayGrabAnimOnExecute = false;
         }
     }
 
@@ -219,11 +223,146 @@ namespace SmallTrapDestroyAnimal
 
     public class TrapExtended : Trap
     {
+        public override void Catch()
+        {
+            int index = -1;
+            for (int i = 0; i < m_AIIDs.Count; i++)
+            {
+                if (m_AIIDs[i] == AI.AIID.CaimanLizard) 
+                {
+                    index = i;
+                }
+            }
+
+            if(index != -1)
+            {
+                m_AIIDs.RemoveAt(index);
+            }
+
+            if (this.m_AIs.Count > 0)
+            {
+                return;
+            }
+            AI.AIID aiid = AI.AIID.None;
+            if (!this.m_FishTrap)
+            {
+                List<AI.AIID> list = new List<AI.AIID>();
+                for (int i = 0; i < AIManager.Get().m_Spawners.Count; i++)
+                {
+                    AISpawner aispawner = AIManager.Get().m_Spawners[i] as AISpawner;
+                    if (aispawner && aispawner.enabled)
+                    {
+                        if (!aispawner.m_Bounds.Contains(base.transform.position))
+                        {
+                            Vector3 to = aispawner.m_Bounds.ClosestPoint(base.transform.position);
+                            if (base.transform.position.Distance(to) > this.m_AdditionalDist)
+                            {
+                                goto IL_C7;
+                            }
+                        }
+                        if (this.m_AIIDs.Contains(aispawner.m_ID) && DifficultySettings.IsAIIDEnabled(aispawner.m_ID) && aispawner.m_ID != AI.AIID.CaimanLizard)
+                        {
+                            list.Add(aispawner.m_ID);
+                        }
+                    }
+                IL_C7:;
+                }
+                if (list.Count > 0)
+                {
+                    aiid = list[UnityEngine.Random.Range(0, list.Count)];
+                }
+                else
+                {
+                    if (UnityEngine.Random.Range(0f, 1f) < this.m_ChanceToCatchOutsideSpawner)
+                    {
+                        aiid = this.m_AIIDs[UnityEngine.Random.Range(0, this.m_AIIDs.Count)];
+                    }
+                    if (!DifficultySettings.IsAIIDEnabled(aiid))
+                    {
+                        aiid = AI.AIID.None;
+                    }
+                }
+            }
+            else
+            {
+                OccurringFishes occurringFishes = this.m_WaterColl ? this.m_WaterColl.GetComponent<OccurringFishes>() : null;
+                if (occurringFishes)
+                {
+                    List<AI.AIID> list2 = new List<AI.AIID>();
+                    foreach (AI.AIID aiid2 in this.m_AIIDs)
+                    {
+                        if (occurringFishes.m_IDs.Contains(aiid2) && DifficultySettings.IsAIIDEnabled(aiid2))
+                        {
+                            list2.Add(aiid2);
+                        }
+                    }
+                    if (list2.Count > 0)
+                    {
+                        aiid = list2[UnityEngine.Random.Range(0, list2.Count)];
+                    }
+                    else
+                    {
+                        LiquidSource liquidSource = this.m_WaterColl ? this.m_WaterColl.GetComponent<LiquidSource>() : null;
+                        if (liquidSource == null || liquidSource.m_LiquidType != LiquidType.PoisonedWater)
+                        {
+                            if (UnityEngine.Random.Range(0f, 1f) < this.m_ChanceToCatchOutsideSpawner)
+                            {
+                                aiid = this.m_AIIDs[UnityEngine.Random.Range(0, this.m_AIIDs.Count)];
+                            }
+                            if (!DifficultySettings.IsAIIDEnabled(aiid))
+                            {
+                                aiid = AI.AIID.None;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    aiid = this.m_AIIDs[UnityEngine.Random.Range(0, this.m_AIIDs.Count)];
+                    if (!DifficultySettings.IsAIIDEnabled(aiid))
+                    {
+                        aiid = AI.AIID.None;
+                    }
+                }
+            }
+            if (aiid != AI.AIID.None)
+            {
+                if (this.m_SpecificAIDummies.ContainsKey((int)aiid))
+                {
+                    for (int j = 0; j < this.m_SpecificAIDummies[(int)aiid].Count; j++)
+                    {
+                        this.Catch(aiid, j);
+                    }
+                }
+                else
+                {
+                    this.Catch(aiid, 0);
+                }
+            }
+            else
+            {
+                if (this.m_Bait && this.m_Bait.m_Item)
+                {
+                    this.m_Bait.DeleteItem();
+                }
+                this.SetArmed(false);
+                this.m_ChanceToCatchOutsideSpawner += this.m_ChanceToCatchOutsideSpawnerChange;
+            }
+            base.ReplSetDirty();
+        }
+
         protected void Catch(AI.AIID id, int index)
         {
             if (id != AI.AIID.None && id != AI.AIID.CaimanLizard)
             {
                 GameObject prefab = GreenHellGame.Instance.GetPrefab(id.ToString());
+                bool flag = id != AI.AIID.GoliathBirdEater && id != AI.AIID.Scorpion && id != AI.AIID.CaneToad
+                && id != AI.AIID.BrasilianWanderingSpider && id != AI.AIID.Mouse;
+                if (flag)
+                {
+                    UnityEngine.Object.Destroy(prefab.GetComponent<AudioClip>());
+                }
+
                 GameObject gameObject = UnityEngine.Object.Instantiate(prefab);
                 SetupAI(gameObject, prefab.name, index);
                 AIReplicator component = gameObject.GetComponent<AIReplicator>();
@@ -248,14 +387,14 @@ namespace SmallTrapDestroyAnimal
     {
         public static void Log(string log)
         {
-            CJDebug.Log("SmallTrapDestroyAnimal: " + log);
-            ModAPI.Log.Write("SmallTrapDestroyAnimal: " + log);
+            CJDebug.Log("SmallTrapDestroyAnimal:" + log);
+            ModAPI.Log.Write("SmallTrapDestroyAnimal:" + log);
         }
 
         public static void LogError(string log)
         {
-            CJDebug.Log("SmallTrapDestroyAnimal:Error: " + log);
-            ModAPI.Log.Write("SmallTrapDestroyAnimal:Error: " + log);
+            CJDebug.Log("SmallTrapDestroyAnimal:Error:" + log);
+            ModAPI.Log.Write("SmallTrapDestroyAnimal:Error:" + log);
         }
     }
 

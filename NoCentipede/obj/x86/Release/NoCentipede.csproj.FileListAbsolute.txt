@@ -1,0 +1,6 @@
+D:\Programs\modapi\projects\GH\NoCentipede\Mod\NoCentipede.dll
+D:\Programs\modapi\projects\GH\NoCentipede\Mod\NoCentipede.pdb
+D:\Programs\modapi\projects\GH\NoCentipede\obj\x86\Release\NoCentipede.csproj.AssemblyReference.cache
+D:\Programs\modapi\projects\GH\NoCentipede\obj\x86\Release\NoCentipede.csproj.CoreCompileInputs.cache
+D:\Programs\modapi\projects\GH\NoCentipede\obj\x86\Release\NoCentipede.dll
+D:\Programs\modapi\projects\GH\NoCentipede\obj\x86\Release\NoCentipede.pdb

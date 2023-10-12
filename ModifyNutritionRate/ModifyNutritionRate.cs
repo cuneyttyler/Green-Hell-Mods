@@ -138,7 +138,7 @@ namespace ModifyNutritionRate
 
             Log("CarboIncrease = " + carboIncrease);
 
-            m_NeedCarbo = (1f - carboPercentage) * 100 + carboIncrease;
+            m_NeedCarbo = (1f - carboPercentage) * 100; // + carboIncrease;
             m_NeedCarbo = Mathf.Clamp(this.m_NeedCarbo, 0f, GetMaxCarboNeed());
 
             Log("m_NutritionCarbo = " + m_NutritionCarbo);
@@ -156,7 +156,7 @@ namespace ModifyNutritionRate
 
             Log("fatIncrease = " + fatIncrease);
 
-            m_NeedFat = (1f - fatPercentage) * 100 + fatIncrease + carboIncrease * m_fatCarboIncreaseFactor;
+            m_NeedFat = (1f - fatPercentage) * 100; // + fatIncrease + carboIncrease * m_fatCarboIncreaseFactor;
             m_NeedFat = Mathf.Clamp(this.m_NeedFat, 0f, GetMaxFatNeed());
 
             Log("m_NutritionFat = " + m_NutritionFat);
@@ -173,7 +173,7 @@ namespace ModifyNutritionRate
 
             Log("proteinIncrease = " + proteinIncrease);
 
-            m_NeedProteins = (1f - proteinPercentage) * 100 + proteinIncrease + fatIncrease * m_proteinFatIncreaseFactor + carboIncrease * m_proteinCarboIncreaseFactor;
+            m_NeedProteins = (1f - proteinPercentage) * 100; // + proteinIncrease + fatIncrease * m_proteinFatIncreaseFactor + carboIncrease * m_proteinCarboIncreaseFactor;
             m_NeedProteins = Mathf.Clamp(this.m_NeedProteins, 0f, GetMaxProteinNeed());
 
             Log("m_NutritionProteins = " + m_NutritionProteins);
