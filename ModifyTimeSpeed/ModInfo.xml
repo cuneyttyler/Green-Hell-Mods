@@ -1,10 +1,10 @@
 <Mod ID="ModifyTimeSpeed">
-  <Compatible>2.5.2</Compatible>
+  <Compatible>2.5.3</Compatible>
   <Name>
     <EN>ModifyTimeSpeed</EN>
   </Name>
   <Description>
     <EN>ModifyTimeSpeed</EN>
   </Description>
-  <Version>1.0.0.2</Version>
+  <Version>1.0.0.0</Version>
 </Mod>

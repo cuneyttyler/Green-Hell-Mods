@@ -3,8 +3,8 @@ using Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using UnityEngine;
-using static RootMotion.FinalIK.AimPoser;
 
 namespace SpiritualWarfare
 {
@@ -13,7 +13,7 @@ namespace SpiritualWarfare
         protected override void Start()
         {
             base.Start();
-            
+
             Logger.Log("Initializing...");
 
             if (SpiritualWarfare.Instance == null)
@@ -30,10 +30,14 @@ namespace SpiritualWarfare
         public static String CROSS_RESOURCE_ID = "Cross";
         public static String SALVATION_RESOURCE_ID = "Salvation";
         public static String CROSS_CHOIR_RESOURCE_ID = "CrossChoir";
+        public static String PATER_NOSTER_RESOURCE_ID = "Jake_Pater_Noster";
+        public static String AVE_MARIA_RESOURCE_ID = "Jake_Ave_Maria";
+        public static String SIGNUM_CRUCIS_RESOURCE_ID = "Jake_Signum_Crucis";
+        public static String GLORIA_PATRI_RESOURCE_ID = "Jake_Gloria_Patri";
 
         private static AssetBundle ASSET_BUNDLE;
         public static List<TransformData> transformData = new List<TransformData>();
-        private List<GameObject> totemObjects = new List<GameObject> ();
+        private List<GameObject> totemObjects = new List<GameObject>();
         public static bool isLastActionDestroy = false;
 
         public static SpiritualWarfare Get()
@@ -60,7 +64,7 @@ namespace SpiritualWarfare
         {
             transformData = new List<TransformData>();
             totemObjects = new List<GameObject>();
-    }
+        }
 
         void LoadAssetBundle()
         {
@@ -69,7 +73,7 @@ namespace SpiritualWarfare
                 Logger.Log("Loading asset bundle from path " + ASSET_PATH + ".");
                 AssetBundleCreateRequest request = AssetBundle.LoadFromMemoryAsync(File.ReadAllBytes(ASSET_PATH));
 
-                if(request.assetBundle == null)
+                if (request.assetBundle == null)
                 {
                     Logger.LogError("Bundle loaded as null!");
                     return;
@@ -89,11 +93,11 @@ namespace SpiritualWarfare
         {
             Logger.Log("Initializing objects.");
             Logger.Log("Building previously built totems." + transformData.Count + " in total.");
-            foreach(TransformData transformData in transformData)
+            foreach (TransformData transformData in transformData)
             {
-                try { 
+                try {
                     BuildTotem(CROSS_RESOURCE_ID, transformData, false);
-                } catch(Exception e)
+                } catch (Exception e)
                 {
                     Logger.LogError("Exception while building totem. " + e.ToString());
                 }
@@ -108,13 +112,11 @@ namespace SpiritualWarfare
                 if (Input.GetKeyDown(KeyCode.T) || Input.GetKeyDown(KeyCode.JoystickButton5))
                 {
                     Item currentItem = Player.Get().GetCurrentItem(Enums.Hand.Right);
-                    if (currentItem.GetInfoID() == Enums.ItemID.Log) 
+                    if (currentItem.GetInfoID() == Enums.ItemID.Log)
                     {
-                        Logger.Log("Building totem.");
                         DropAndDestroyLog(currentItem);
                         BuildTotem(SpiritualWarfare.CROSS_RESOURCE_ID);
-                        PlaySound(CROSS_CHOIR_RESOURCE_ID);
-                        Logger.Log("Totem built.");
+                        PlayStopSound(CROSS_CHOIR_RESOURCE_ID);
 
                     }
                 }
@@ -122,9 +124,25 @@ namespace SpiritualWarfare
                 {
                     RevertLastBuild();
                 }
-                if (Input.GetKeyDown(KeyCode.Y) || (Input.GetKeyDown(KeyCode.JoystickButton5)) && Input.GetKeyDown(KeyCode.JoystickButton3))
+                if (Input.GetKeyDown(KeyCode.Y) || (Input.GetKeyDown(KeyCode.JoystickButton7)) && Input.GetKeyDown(KeyCode.JoystickButton3))
                 {
-                    PlaySound(SALVATION_RESOURCE_ID);
+                    PlayStopSound(SALVATION_RESOURCE_ID);
+                }
+                if ((Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R)) || (Input.GetKeyDown(KeyCode.JoystickButton7) && Input.GetKeyDown(KeyCode.JoystickButton6)))
+                {
+                    PlayPrayer(PATER_NOSTER_RESOURCE_ID);
+                }
+                if ((Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.T)) || (Input.GetKeyDown(KeyCode.JoystickButton6) && Input.GetKeyDown(KeyCode.JoystickButton3)))
+                {
+                    PlayPrayer(AVE_MARIA_RESOURCE_ID);
+                }
+                if ((Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.V)) || (Input.GetKeyDown(KeyCode.JoystickButton6) && Input.GetKeyDown(KeyCode.JoystickButton0)))
+                {
+                    PlayPrayer(SIGNUM_CRUCIS_RESOURCE_ID);
+                }
+                if ((Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.B)) || (Input.GetKeyDown(KeyCode.JoystickButton7) && Input.GetKeyDown(KeyCode.JoystickButton0)))
+                {
+                    PlayPrayer(GLORIA_PATRI_RESOURCE_ID);
                 }
             }
             catch (Exception e)
@@ -155,7 +173,7 @@ namespace SpiritualWarfare
             ConstructionGhost ghostComponent = prefab.AddComponent<ConstructionGhost>();
             prefab = UnityEngine.Object.Instantiate<GameObject>(prefab, position, rotation);
 
-            if(write)
+            if (write)
             {
                 transformData.Add(new TransformData(position, rotation, new Vector3()));
             }
@@ -167,7 +185,6 @@ namespace SpiritualWarfare
 
         void DropAndDestroyLog(Item log)
         {
-            Logger.Log("Dropping log and removing.");
             Player.Get().DropItem(log);
             UnityEngine.Object.Destroy(log.gameObject);
         }
@@ -189,14 +206,13 @@ namespace SpiritualWarfare
 
         void RevertLastBuild()
         {
-            if(isLastActionDestroy == true)
+            if (isLastActionDestroy == true)
             {
                 return;
             }
             isLastActionDestroy = true;
 
-            Logger.Log("Reverting last built totem.");
-            if(totemObjects.Count > 0)
+            if (totemObjects.Count > 0)
             {
                 TransformData data = transformData[transformData.Count - 1];
 
@@ -207,23 +223,112 @@ namespace SpiritualWarfare
             }
         }
 
-        void PlaySound(String path)
+        void PlayStopSound(String path)
         {
-            Logger.Log("Loading music - " + path);
+            AudioClip audioClip = LoadAudio(path);
+            if (!audioClip)
+            {
+                return;
+            }
+
+            if (PlayerAudioModule.Get().IsSoundPlaying(audioClip))
+            {
+                PlayerAudioModule.Get().StopSound(audioClip);
+                return;
+            }
+
+            PlayerAudioModule.Get().PlaySound(audioClip);
+        }
+
+        void PlayPrayer(String path)
+        {
+            if(IsPrayerPlaying())
+            {
+                StopPrayer();
+                StopLookController();
+                return;
+            }
+
+
+            SetPrayerTimer(path);
+            StartLookController();
+            PlayStopSound(path);
+        }
+
+        void SetPrayerTimer(String path)
+        {
+            TimerCallback callback = PrayerTimer;
+            Timer timer = new Timer(callback, null, GetPrayerTime(path), Timeout.Infinite);
+        }
+
+        void PrayerTimer(object state)
+        {
+            StopLookController();
+        }
+
+        int GetPrayerTime(string prayer)
+        {
+            int time = 0;
+
+            if (prayer == PATER_NOSTER_RESOURCE_ID)
+            {
+                time = 33000;
+            }
+            else if (prayer == AVE_MARIA_RESOURCE_ID)
+            {
+                time = 24000;
+            }
+            else if (prayer == SIGNUM_CRUCIS_RESOURCE_ID)
+            {
+                time = 5000;
+            }
+            else if (prayer == GLORIA_PATRI_RESOURCE_ID)
+            {
+                time = 25000;
+            }
+
+            return time;
+        }
+
+        bool IsPrayerPlaying()
+        {
+            bool ret = PlayerAudioModule.Get().IsSoundPlaying(LoadAudio(PATER_NOSTER_RESOURCE_ID)) || PlayerAudioModule.Get().IsSoundPlaying(LoadAudio(AVE_MARIA_RESOURCE_ID)) ||
+                PlayerAudioModule.Get().IsSoundPlaying(LoadAudio(SIGNUM_CRUCIS_RESOURCE_ID)) || PlayerAudioModule.Get().IsSoundPlaying(LoadAudio(GLORIA_PATRI_RESOURCE_ID));
+            return ret;
+        }
+
+        void StopPrayer()
+        {
+            PlayerAudioModule.Get().StopSound(LoadAudio(PATER_NOSTER_RESOURCE_ID));
+            PlayerAudioModule.Get().StopSound(LoadAudio(AVE_MARIA_RESOURCE_ID));
+            PlayerAudioModule.Get().StopSound(LoadAudio(SIGNUM_CRUCIS_RESOURCE_ID));
+            PlayerAudioModule.Get().StopSound(LoadAudio(GLORIA_PATRI_RESOURCE_ID));
+        }
+
+        void StartLookController()
+        {
+            Player.Get().StartController(PlayerControllerType.Look);
+        }
+
+        void StopLookController()
+        {
+            Player.Get().StopController(PlayerControllerType.Look);
+        }
+
+        AudioClip LoadAudio(String path)
+        {
             AudioClip audioClip = Load<AudioClip>(path);
             if (!audioClip)
             {
                 Logger.LogError("Sound prefab could not be found in the assets - " + path);
-                return;
+                return null;
             }
-            Logger.Log("Music loaded. Playing...");
-            PlayerAudioModule.Get().StopSound(audioClip);
-            PlayerAudioModule.Get().PlaySound(audioClip);
+
+            return audioClip;
         }
 
         static T Load<T>(String path) where T : UnityEngine.Object
         {
-            Logger.Log("Load asset " + path);
             return ASSET_BUNDLE.LoadAsset<T>(path);
         }
     }
@@ -293,13 +398,15 @@ namespace SpiritualWarfare
         {
             base.DoSaveGame();
             Logger.Log("Saving totems.");
-            try { 
+            try
+            {
                 FileUtil.writeTransformData(this.m_SlotIdx);
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Logger.LogError(e.ToString());
             }
-}
+        }
     }
 
     [Serializable]
