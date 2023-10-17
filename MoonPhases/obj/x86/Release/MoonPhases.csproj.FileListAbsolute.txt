@@ -1,0 +1,6 @@
+D:\Programs\modapi\projects\GH\MoonPhases\obj\x86\Release\MoonPhases.csproj.AssemblyReference.cache
+D:\Programs\modapi\projects\GH\MoonPhases\obj\x86\Release\MoonPhases.csproj.CoreCompileInputs.cache
+D:\Programs\modapi\projects\GH\MoonPhases\Mod\MoonPhases.dll
+D:\Programs\modapi\projects\GH\MoonPhases\Mod\MoonPhases.pdb
+D:\Programs\modapi\projects\GH\MoonPhases\obj\x86\Release\MoonPhases.dll
+D:\Programs\modapi\projects\GH\MoonPhases\obj\x86\Release\MoonPhases.pdb

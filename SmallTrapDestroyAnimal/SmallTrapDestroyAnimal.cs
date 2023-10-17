@@ -16,7 +16,17 @@ namespace SmallTrapDestroyAnimal
         {
             AI.AIID id = this.m_AI.m_ID;
 
-            Item item = ItemsManager.Get().CreateItem(id.ToString() + "_Body", false);
+            Item item;
+            bool flag = id != AI.AIID.GoliathBirdEater && id != AI.AIID.Scorpion && id != AI.AIID.CaneToad
+                && id != AI.AIID.BrasilianWanderingSpider && id != AI.AIID.Mouse;
+            if (flag)
+            {
+                item = ItemsManager.Get().CreateItem(id.ToString(), false);
+            } else
+            {
+                item = ItemsManager.Get().CreateItem(id.ToString() + "_Body", false);
+            }
+                
             if (id == AI.AIID.PoisonDartFrog)
             {
                 Renderer[] componentsDeepChild = General.GetComponentsDeepChild<Renderer>(base.gameObject);
@@ -27,8 +37,7 @@ namespace SmallTrapDestroyAnimal
                 }
                 item.ApplyMaterial(material);
             }
-            if (id != AI.AIID.GoliathBirdEater && id != AI.AIID.Scorpion && id != AI.AIID.CaneToad
-                && id != AI.AIID.BrasilianWanderingSpider && id != AI.AIID.Mouse)
+            if (flag)
             {
                 if (!item.Take(true))
                 {
@@ -236,6 +245,7 @@ namespace SmallTrapDestroyAnimal
 
             if(index != -1)
             {
+                Logger.Log("Removing Caiman Lizard from catch list.");
                 m_AIIDs.RemoveAt(index);
             }
 
@@ -355,11 +365,16 @@ namespace SmallTrapDestroyAnimal
         {
             if (id != AI.AIID.None && id != AI.AIID.CaimanLizard)
             {
-                GameObject prefab = GreenHellGame.Instance.GetPrefab(id.ToString());
+                GameObject prefab;
                 bool flag = id != AI.AIID.GoliathBirdEater && id != AI.AIID.Scorpion && id != AI.AIID.CaneToad
                 && id != AI.AIID.BrasilianWanderingSpider && id != AI.AIID.Mouse;
                 if (flag)
                 {
+                    Logger.Log("Changing prefab to body.");
+                    prefab = GreenHellGame.Instance.GetPrefab(id.ToString() + "_Body");
+                } else
+                {
+                    prefab = GreenHellGame.Instance.GetPrefab(id.ToString());
                     UnityEngine.Object.Destroy(prefab.GetComponent<AudioClip>());
                 }
 
@@ -380,6 +395,83 @@ namespace SmallTrapDestroyAnimal
             SetArmed(set: false);
             m_ChanceToCatchOutsideSpawner = 0f;
             ReplSetDirty();
+        }
+
+        public override void SetupAI(GameObject ai_obj, string ai_name, int index)
+        {
+            ai_obj.name = ai_name;
+            AI component = ai_obj.GetComponent<AI>();
+            component.SetTrap(this);
+            Behaviour[] components = ai_obj.GetComponents<Behaviour>();
+            for (int i = 0; i < components.Length; i++)
+            {
+                Type type = components[i].GetType();
+                if (type != typeof(Transform) && type != typeof(BoxCollider) && type != typeof(Animator) && type != typeof(AI) && !type.IsSubclassOf(typeof(AI)) && type != typeof(SkinnedMeshRenderer) && type != typeof(AnimationEventsReceiver) && type != typeof(GuidComponent) && type != typeof(ReplicationComponent) && type != typeof(Relevance) && type != typeof(AIReplicator) && !type.IsSubclassOf(typeof(AISoundModule)) && type != typeof(AudioSource))
+                {
+                    if (components[i] is IReplicatedBehaviour)
+                    {
+                        components[i].enabled = false;
+                    }
+                    else
+                    {
+                        UnityEngine.Object.Destroy(components[i]);
+                    }
+                }
+
+                if(type.IsSubclassOf(typeof(AISoundModule)) || type == typeof(AudioSource))
+                {
+                    Logger.Log("Destroying sound component.");
+                    UnityEngine.Object.Destroy(components[i]);
+                }
+            }
+
+            component.m_BoxCollider.isTrigger = true;
+            component.SetTrap(this);
+            component.m_TrapDummyIndex = index;
+            if ((m_Effect == Effect.Block || m_Info.m_ID == ItemID.Snare_Trap) && (bool)component.m_SoundModule)
+            {
+                component.m_SoundModule.SetPanicForSnareTrap();
+            }
+
+            if ((bool)GreenHellGame.Instance.GetPrefab(component.m_ID.ToString() + "_Body"))
+            {
+                ai_obj.AddComponent<AIInTrapTrigger>().m_AI = component;
+            }
+            else
+            {
+                component.AddDeadBodyComponent();
+            }
+
+            Transform transform = null;
+            if (!m_SpecificAIDummies.ContainsKey((int)component.m_ID))
+            {
+                transform = ((!(m_AIDummy != null)) ? base.transform : m_AIDummy);
+            }
+            else
+            {
+                if (component.m_TrapDummyIndex >= m_SpecificAIDummies[(int)component.m_ID].Count)
+                {
+                    component.m_TrapDummyIndex = 0;
+                }
+
+                transform = m_SpecificAIDummies[(int)component.m_ID][component.m_TrapDummyIndex];
+            }
+
+            ai_obj.transform.position = transform.position;
+            ai_obj.transform.rotation = transform.rotation;
+            if ((bool)m_WaterColl)
+            {
+                Vector3 position = ai_obj.transform.position;
+                position.y = m_WaterColl.bounds.max.y - component.m_BoxCollider.size.y * 0.5f;
+                ai_obj.transform.position = position;
+            }
+
+            if (!m_AIs.Contains(component))
+            {
+                m_AIs.Add(component);
+            }
+
+            UpdateEffect();
         }
     }
 

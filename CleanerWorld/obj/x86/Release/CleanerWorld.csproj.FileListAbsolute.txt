@@ -1,0 +1,6 @@
+D:\Programs\modapi\projects\GH\CleanerWorld\obj\x86\Release\CleanerWorld.csproj.AssemblyReference.cache
+D:\Programs\modapi\projects\GH\CleanerWorld\obj\x86\Release\CleanerWorld.csproj.CoreCompileInputs.cache
+D:\Programs\modapi\projects\GH\CleanerWorld\Mod\CleanerWorld.dll
+D:\Programs\modapi\projects\GH\CleanerWorld\Mod\CleanerWorld.pdb
+D:\Programs\modapi\projects\GH\CleanerWorld\obj\x86\Release\CleanerWorld.dll
+D:\Programs\modapi\projects\GH\CleanerWorld\obj\x86\Release\CleanerWorld.pdb

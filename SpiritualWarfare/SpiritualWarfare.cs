@@ -40,6 +40,9 @@ namespace SpiritualWarfare
         private List<GameObject> totemObjects = new List<GameObject>();
         public static bool isLastActionDestroy = false;
 
+        public static bool prayerMode = false;
+        private Timer prayerTimer;
+
         public static SpiritualWarfare Get()
         {
             return SpiritualWarfare.Instance;
@@ -96,7 +99,7 @@ namespace SpiritualWarfare
             foreach (TransformData transformData in transformData)
             {
                 try {
-                    BuildTotem(CROSS_RESOURCE_ID, transformData, false);
+                    BuildTotem(CROSS_RESOURCE_ID, transformData, false, false);
                 } catch (Exception e)
                 {
                     Logger.LogError("Exception while building totem. " + e.ToString());
@@ -109,6 +112,30 @@ namespace SpiritualWarfare
         {
             try
             {
+                if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.JoystickButton1)
+                    || Input.GetKeyDown(KeyCode.JoystickButton2) || Input.GetKeyDown(KeyCode.JoystickButton3))
+                {
+                    EnterPrayerMode();
+                    Inventory3DManager.Get().enabled = false;
+                }
+
+                if (Input.GetKeyUp(KeyCode.JoystickButton0) || Input.GetKeyUp(KeyCode.JoystickButton1)
+                    || Input.GetKeyUp(KeyCode.JoystickButton2) || Input.GetKeyUp(KeyCode.JoystickButton3))
+                {
+                    QuitPrayerMode();
+                    Inventory3DManager.Get().enabled = true;
+                }
+
+                if (Input.GetKeyDown(KeyCode.JoystickButton5))
+                {
+                    Inventory3DManager.Get().enabled = false;
+                }
+
+                if (Input.GetKeyUp(KeyCode.JoystickButton5))
+                {
+                    Inventory3DManager.Get().enabled = true;
+                }
+
                 if (Input.GetKeyDown(KeyCode.T) || Input.GetKeyDown(KeyCode.JoystickButton5))
                 {
                     Item currentItem = Player.Get().GetCurrentItem(Enums.Hand.Right);
@@ -120,27 +147,33 @@ namespace SpiritualWarfare
 
                     }
                 }
-                if (Input.GetKeyDown(KeyCode.L) || (Input.GetKeyDown(KeyCode.JoystickButton0) && Input.GetKeyDown(KeyCode.JoystickButton3)))
+                if (Input.GetKeyDown(KeyCode.L) ||
+                    (Input.GetKeyDown(KeyCode.JoystickButton2) && Input.GetKeyDown(KeyCode.JoystickButton3)))
                 {
                     RevertLastBuild();
                 }
-                if (Input.GetKeyDown(KeyCode.Y) || (Input.GetKeyDown(KeyCode.JoystickButton7)) && Input.GetKeyDown(KeyCode.JoystickButton3))
+                if (Input.GetKeyDown(KeyCode.Y) ||
+                    (Input.GetKey(KeyCode.JoystickButton5)) && Input.GetKeyDown(KeyCode.JoystickButton4))
                 {
                     PlayStopSound(SALVATION_RESOURCE_ID);
                 }
-                if ((Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R)) || (Input.GetKeyDown(KeyCode.JoystickButton7) && Input.GetKeyDown(KeyCode.JoystickButton6)))
+                if ((Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R)) ||
+                    ((Input.GetKey(KeyCode.JoystickButton3) && Input.GetKeyDown(KeyCode.JoystickButton5))))
                 {
                     PlayPrayer(PATER_NOSTER_RESOURCE_ID);
                 }
-                if ((Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.T)) || (Input.GetKeyDown(KeyCode.JoystickButton6) && Input.GetKeyDown(KeyCode.JoystickButton3)))
+                if ((Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.T)) ||
+                    (Input.GetKey(KeyCode.JoystickButton2) && Input.GetKeyDown(KeyCode.JoystickButton5)))
                 {
                     PlayPrayer(AVE_MARIA_RESOURCE_ID);
                 }
-                if ((Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.V)) || (Input.GetKeyDown(KeyCode.JoystickButton6) && Input.GetKeyDown(KeyCode.JoystickButton0)))
+                if ((Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.V)) ||
+                    (Input.GetKey(KeyCode.JoystickButton3) && Input.GetKeyDown(KeyCode.JoystickButton4)))
                 {
                     PlayPrayer(SIGNUM_CRUCIS_RESOURCE_ID);
                 }
-                if ((Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.B)) || (Input.GetKeyDown(KeyCode.JoystickButton7) && Input.GetKeyDown(KeyCode.JoystickButton0)))
+                if ((Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.B)) ||
+                    (Input.GetKey(KeyCode.JoystickButton2) && Input.GetKeyDown(KeyCode.JoystickButton4)))
                 {
                     PlayPrayer(GLORIA_PATRI_RESOURCE_ID);
                 }
@@ -151,18 +184,24 @@ namespace SpiritualWarfare
             }
         }
 
-        void BuildTotem(String item, TransformData transform = null, bool write = true)
+        void BuildTotem(String item, TransformData transform = null, bool write = true, bool debug = false)
         {
-            Logger.Log("Loading prefab " + item + ".");
+            if (debug)
+            {
+                Logger.Log("Loading prefab " + item + ".");
+            }
             GameObject prefab = SpiritualWarfare.Load<GameObject>(item);
 
             if (prefab == null)
             {
-                Logger.Log("Prefab couldn't be loaded.");
+                Logger.LogError("Prefab couldn't be loaded - " + item);
                 return;
             }
 
-            Logger.Log("Prefab successfully loaded. Building totem.");
+            if (debug)
+            {
+                Logger.Log("Prefab successfully loaded. Building totem.");
+            }
 
             Vector3 position = transform != null ? transform.position : CalculatePosition();
 
@@ -242,10 +281,12 @@ namespace SpiritualWarfare
 
         void PlayPrayer(String path)
         {
-            if(IsPrayerPlaying())
+            if (IsPrayerPlaying())
             {
                 StopPrayer();
                 StopLookController();
+                QuitPrayerMode();
+                DisableTimer();
                 return;
             }
 
@@ -258,12 +299,13 @@ namespace SpiritualWarfare
         void SetPrayerTimer(String path)
         {
             TimerCallback callback = PrayerTimer;
-            Timer timer = new Timer(callback, null, GetPrayerTime(path), Timeout.Infinite);
+            prayerTimer = new Timer(callback, null, GetPrayerTime(path), Timeout.Infinite);
         }
 
         void PrayerTimer(object state)
         {
             StopLookController();
+            QuitPrayerMode();
         }
 
         int GetPrayerTime(string prayer)
@@ -272,7 +314,7 @@ namespace SpiritualWarfare
 
             if (prayer == PATER_NOSTER_RESOURCE_ID)
             {
-                time = 33000;
+                time = 32000;
             }
             else if (prayer == AVE_MARIA_RESOURCE_ID)
             {
@@ -288,6 +330,14 @@ namespace SpiritualWarfare
             }
 
             return time;
+        }
+
+        void DisableTimer()
+        {
+            if(prayerTimer != null)
+            {
+                prayerTimer.Dispose();
+            }
         }
 
         bool IsPrayerPlaying()
@@ -315,6 +365,16 @@ namespace SpiritualWarfare
             Player.Get().StopController(PlayerControllerType.Look);
         }
 
+        void EnterPrayerMode()
+        {
+            prayerMode = true;
+        }
+
+        void QuitPrayerMode()
+        {
+            prayerMode = false;
+        }
+
         AudioClip LoadAudio(String path)
         {
             AudioClip audioClip = Load<AudioClip>(path);
@@ -330,6 +390,31 @@ namespace SpiritualWarfare
         static T Load<T>(String path) where T : UnityEngine.Object
         {
             return ASSET_BUNDLE.LoadAsset<T>(path);
+        }
+    }
+
+    public class PlayerExtended : Player
+    {
+        public override void StartControllerInternal()
+        {
+            if(SpiritualWarfare.prayerMode && m_ControllerToStart == PlayerControllerType.Watch)
+            {
+                m_ControllerToStart = PlayerControllerType.Unknown;
+                return;
+            }
+
+            base.StartControllerInternal();
+        }
+    }
+
+    public class Inventory3DManagerExtended : Inventory3DManager
+    {
+        public override void Activate()
+        {
+            if(enabled)
+            {
+                base.Activate();
+            } 
         }
     }
 
