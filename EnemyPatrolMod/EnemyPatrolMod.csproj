@@ -328,7 +328,7 @@
 
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HumanAIPatrolExtended.cs"  />
+    <Compile Include="EnemyPatrolMod.cs"  />
 
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

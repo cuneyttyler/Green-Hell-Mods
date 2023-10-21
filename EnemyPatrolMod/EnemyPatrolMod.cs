@@ -14,8 +14,8 @@ namespace EnemyPatrolMod
         protected override void Start()
         {
             base.Start();
-            
-            if(LogWindow.Instance == null)
+
+            if (LogWindow.Instance == null)
             {
                 LogWindow.Instance = new GameObject("__LogWindow__").AddComponent<LogWindow>();
             }
@@ -181,18 +181,19 @@ namespace EnemyPatrolMod
             //{
             //    if (init && debug)
             //    {
-                    //Log("Respawning totem. " + totemsDatum.m_Position.position.ToString());
-                    //base.RespawnTotem(totemsDatum);
-                    //Log("Totem respawned.");
-                    //init = false;
+            //Log("Respawning totem. " + totemsDatum.m_Position.position.ToString());
+            //base.RespawnTotem(totemsDatum);
+            //Log("Totem respawned.");
+            //init = false;
             //    }
             //}
-            if (debug) { 
+            if (debug)
+            {
                 Log("Village count: " + m_ConnectedVillages.Count + ", Destroyed village count: " + GetDestroyedVillageCount());
                 Log("Totem count: " + m_TotemsData.Count + ", Destroyed totem count: " + GetDestroyedTotemCount());
                 foreach (TotemData totemsDatum in base.m_TotemsData)
                 {
-                    if(!totemsDatum.m_IsDestroyed)
+                    if (!totemsDatum.m_IsDestroyed)
                         Log("Non-Destroyed totem position: " + totemsDatum.m_Position.position.ToString());
                 }
             }
@@ -262,7 +263,7 @@ namespace EnemyPatrolMod
         private bool visible = false;
         protected GUIStyle labelStyle;
         private String logText;
-        private String label;
+        private String position;
 
         private void OnGUI()
         {
@@ -280,12 +281,12 @@ namespace EnemyPatrolMod
                 }
 
                 // create box (background)
-                GUI.Box(new Rect(10f, 10f, 480f, 550f), "", GUI.skin.window);
+                GUI.Box(new Rect(10f, 10f, 480f, 580f), "", GUI.skin.window);
 
                 // Label
                 GUI.Label(new Rect(20f, 30f, 100f, 20f), "EnemyPatrolMod:Logs", this.labelStyle);
-                
-                label = GUI.TextArea(new Rect(20f, 60f, 450f, 20f), label, this.labelStyle);
+
+                position = GUI.TextArea(new Rect(20f, 60f, 450f, 20f), position, this.labelStyle);
 
                 // Text-input
                 logText = GUI.TextArea(new Rect(20f, 90f, 450f, 450f), logText, GUI.skin.textField);
@@ -304,7 +305,7 @@ namespace EnemyPatrolMod
 
         public void UpdateLabel(String position)
         {
-            label = position;
+            this.position = position;
         }
 
         private void toggleCursor(bool enabled)
@@ -334,7 +335,7 @@ namespace EnemyPatrolMod
             if (Input.GetKeyDown(KeyCode.F11))
             {
                 visible = !visible;
-            } 
+            }
             if (Input.GetKeyDown(KeyCode.Keypad5))
             {
                 logText = "";

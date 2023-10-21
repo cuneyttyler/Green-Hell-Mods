@@ -11,10 +11,7 @@ namespace CleanerWorld
 {
     public class BalanceSystem20Extended : BalanceSystem20
     {
-        public override void OnItemDestroyed(CJObject balance_object)
-        {
-            
-        }
+
     }
 
     public class FarmExtended : Farm
@@ -111,13 +108,6 @@ namespace CleanerWorld
         }
     }
 
-    public class FPPControllerExtended : FPPController
-    {
-        protected override bool CanJump()
-        {
-            return !Player.Get().HasSleighAttached() && PlayerConditionModule.Get().m_Stamina >= PlayerConditionModule.Get().GetStaminaDecrease(StaminaDecreaseReason.Jump) && !Player.Get().GetMovesBlocked() && !InsectsController.Get().IsActive() && !ScenarioManager.Get().IsDream() && !Player.Get().m_Animator.GetBool(TriggerController.Get().m_BDrinkWater) && !Player.Get().m_CurrentLift && !ScenarioManager.Get().IsBoolVariableTrue("PlayerMechGameEnding") && (!GreenHellGame.IsPadControllerActive() || !Inventory3DManager.Get().IsActive()) && (!HeavyObjectController.Get() || !HeavyObjectController.Get().IsActive()) && (!WeaponSpearController.Get().IsActive() || !WeaponSpearController.Get().IsInPresentationState());
-        }
-    }
 
     public class ItemExtended : Item
     {
@@ -787,6 +777,15 @@ namespace CleanerWorld
             {
                 this.m_ActiveGoal.OnUpdate();
             }
+        }
+    }
+
+    public class Logger
+    {
+        public static void Log(String log)
+        {
+            ModAPI.Log.Write(log);
+            CJDebug.Log(log);
         }
     }
 }

@@ -14,6 +14,7 @@ namespace SpiritualWarfare
         {
             base.Start();
 
+            Logger.Log("v3");
             Logger.Log("Initializing...");
 
             if (SpiritualWarfare.Instance == null)
@@ -40,7 +41,7 @@ namespace SpiritualWarfare
         private List<GameObject> totemObjects = new List<GameObject>();
         public static bool isLastActionDestroy = false;
 
-        public static bool prayerMode = false;
+        public static bool prayerMode;
         private Timer prayerTimer;
 
         public static SpiritualWarfare Get()
@@ -67,6 +68,7 @@ namespace SpiritualWarfare
         {
             transformData = new List<TransformData>();
             totemObjects = new List<GameObject>();
+            prayerMode = false;
         }
 
         void LoadAssetBundle()
@@ -112,68 +114,74 @@ namespace SpiritualWarfare
         {
             try
             {
-                if (Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.JoystickButton1)
-                    || Input.GetKeyDown(KeyCode.JoystickButton2) || Input.GetKeyDown(KeyCode.JoystickButton3))
+                KeyCode Button_X = KeyHelper.KeyFromPad(KeyHelper.PadButton.Button_X);
+                KeyCode Button_Y = KeyHelper.KeyFromPad(KeyHelper.PadButton.Button_Y);
+                KeyCode Button_A = KeyHelper.KeyFromPad(KeyHelper.PadButton.Button_A);
+                KeyCode Button_B = KeyHelper.KeyFromPad(KeyHelper.PadButton.Button_B);
+                KeyCode LB = KeyHelper.KeyFromPad(KeyHelper.PadButton.LB);
+                KeyCode RB = KeyHelper.KeyFromPad(KeyHelper.PadButton.RB);
+
+                if (Input.GetKeyDown(Button_X) || Input.GetKeyDown(Button_Y)
+                    || Input.GetKeyDown(Button_A) || Input.GetKeyDown(Button_B))
                 {
                     EnterPrayerMode();
                     Inventory3DManager.Get().enabled = false;
                 }
 
-                if (Input.GetKeyUp(KeyCode.JoystickButton0) || Input.GetKeyUp(KeyCode.JoystickButton1)
-                    || Input.GetKeyUp(KeyCode.JoystickButton2) || Input.GetKeyUp(KeyCode.JoystickButton3))
+                if (Input.GetKeyUp(Button_X) || Input.GetKeyUp(Button_Y)
+                    || Input.GetKeyUp(Button_A) || Input.GetKeyUp(Button_B))
                 {
                     QuitPrayerMode();
                     Inventory3DManager.Get().enabled = true;
                 }
 
-                if (Input.GetKeyDown(KeyCode.JoystickButton5))
+                if (Input.GetKeyUp(RB))
                 {
                     Inventory3DManager.Get().enabled = false;
                 }
 
-                if (Input.GetKeyUp(KeyCode.JoystickButton5))
+                if (Input.GetKeyUp(RB))
                 {
                     Inventory3DManager.Get().enabled = true;
                 }
 
-                if (Input.GetKeyDown(KeyCode.T) || Input.GetKeyDown(KeyCode.JoystickButton5))
+                if (Input.GetKeyDown(KeyCode.T) || Input.GetKeyDown(RB))
                 {
                     Item currentItem = Player.Get().GetCurrentItem(Enums.Hand.Right);
-                    if (currentItem.GetInfoID() == Enums.ItemID.Log)
+                    if (currentItem != null && currentItem.GetInfoID() == Enums.ItemID.Log)
                     {
                         DropAndDestroyLog(currentItem);
                         BuildTotem(SpiritualWarfare.CROSS_RESOURCE_ID);
                         PlayStopSound(CROSS_CHOIR_RESOURCE_ID);
-
                     }
                 }
                 if (Input.GetKeyDown(KeyCode.L) ||
-                    (Input.GetKeyDown(KeyCode.JoystickButton2) && Input.GetKeyDown(KeyCode.JoystickButton3)))
+                    (Input.GetKeyDown(Button_X) && Input.GetKeyDown(Button_Y)))
                 {
                     RevertLastBuild();
                 }
                 if (Input.GetKeyDown(KeyCode.Y) ||
-                    (Input.GetKey(KeyCode.JoystickButton5)) && Input.GetKeyDown(KeyCode.JoystickButton4))
+                    (Input.GetKeyDown(RB) && Input.GetKeyDown(LB)))
                 {
                     PlayStopSound(SALVATION_RESOURCE_ID);
                 }
                 if ((Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.R)) ||
-                    ((Input.GetKey(KeyCode.JoystickButton3) && Input.GetKeyDown(KeyCode.JoystickButton5))))
+                    (Input.GetKey(Button_Y) && Input.GetKeyDown(RB)))
                 {
                     PlayPrayer(PATER_NOSTER_RESOURCE_ID);
                 }
                 if ((Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.T)) ||
-                    (Input.GetKey(KeyCode.JoystickButton2) && Input.GetKeyDown(KeyCode.JoystickButton5)))
+                    (Input.GetKey(Button_X) && Input.GetKeyDown(RB)))
                 {
                     PlayPrayer(AVE_MARIA_RESOURCE_ID);
                 }
                 if ((Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.V)) ||
-                    (Input.GetKey(KeyCode.JoystickButton3) && Input.GetKeyDown(KeyCode.JoystickButton4)))
+                    (Input.GetKey(Button_Y) && Input.GetKeyDown(LB)))
                 {
                     PlayPrayer(SIGNUM_CRUCIS_RESOURCE_ID);
                 }
                 if ((Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.B)) ||
-                    (Input.GetKey(KeyCode.JoystickButton2) && Input.GetKeyDown(KeyCode.JoystickButton4)))
+                    (Input.GetKey(Button_X) && Input.GetKeyDown(LB)))
                 {
                     PlayPrayer(GLORIA_PATRI_RESOURCE_ID);
                 }
@@ -290,7 +298,6 @@ namespace SpiritualWarfare
                 return;
             }
 
-
             SetPrayerTimer(path);
             StartLookController();
             PlayStopSound(path);
@@ -357,11 +364,13 @@ namespace SpiritualWarfare
 
         void StartLookController()
         {
+            Logger.Log("Start Look Controller");
             Player.Get().StartController(PlayerControllerType.Look);
         }
 
         void StopLookController()
         {
+            Logger.Log("Stop Look Controller");
             Player.Get().StopController(PlayerControllerType.Look);
         }
 
@@ -372,7 +381,10 @@ namespace SpiritualWarfare
 
         void QuitPrayerMode()
         {
-            prayerMode = false;
+            if(!IsPrayerPlaying())
+            {
+                prayerMode = false;
+            }
         }
 
         AudioClip LoadAudio(String path)
@@ -399,8 +411,12 @@ namespace SpiritualWarfare
         {
             if(SpiritualWarfare.prayerMode && m_ControllerToStart == PlayerControllerType.Watch)
             {
+                Logger.Log("PrayerMode on. Not starting watch controller");
                 m_ControllerToStart = PlayerControllerType.Unknown;
                 return;
+            } else if (m_ControllerToStart == PlayerControllerType.Watch)
+            {
+                Logger.Log("Starting watch controller.");
             }
 
             base.StartControllerInternal();
@@ -415,6 +431,71 @@ namespace SpiritualWarfare
             {
                 base.Activate();
             } 
+        }
+    }
+
+    public static class KeyHelper
+    {
+        public enum PadButton
+        {
+            None = -1,
+            Button_X,
+            Button_Y,
+            Button_A,
+            Button_B,
+            LB,
+            RB,
+            Back,
+            Start,
+            R3,
+            L3,
+            LeftStickRot,
+            RightStickRot
+        }
+
+        public static KeyCode KeyFromPad(PadButton pad_button)
+        {
+            return KeyFromPad(pad_button, GreenHellGame.IsPadControllerActive() ? InputsManager.Get().m_PadControllerType : InputsManager.PadControllerType.None);
+        }
+
+        public static KeyCode KeyFromPad(PadButton pad_button, InputsManager.PadControllerType controller_type)
+        {
+            if (controller_type == InputsManager.PadControllerType.Ps4)
+            {
+                switch(pad_button) {
+                    case PadButton.Button_X: return KeyCode.JoystickButton0;
+                    case PadButton.Button_Y: return KeyCode.JoystickButton3;
+                    case PadButton.Button_A: return KeyCode.JoystickButton1;
+                    case PadButton.Button_B: return KeyCode.JoystickButton2;
+                    case PadButton.LB: return KeyCode.JoystickButton4;
+                    case PadButton.RB: return KeyCode.JoystickButton5;
+                    case PadButton.Back: return KeyCode.JoystickButton8;
+                    case PadButton.Start: return KeyCode.JoystickButton9;
+                    case PadButton.R3: return KeyCode.JoystickButton11;
+                    case PadButton.RightStickRot: return KeyCode.JoystickButton11;
+                    case PadButton.L3: return KeyCode.JoystickButton10;
+                    case PadButton.LeftStickRot: return KeyCode.JoystickButton10;
+                    default: return KeyCode.None;
+                }
+            } else
+            {
+                switch (pad_button)
+                {
+                    case PadButton.Button_X: return KeyCode.JoystickButton2;
+                    case PadButton.Button_Y: return KeyCode.JoystickButton3;
+                    case PadButton.Button_A: return KeyCode.JoystickButton0;
+                    case PadButton.Button_B: return KeyCode.JoystickButton1;
+                    case PadButton.LB: return KeyCode.JoystickButton4;
+                    case PadButton.RB: return KeyCode.JoystickButton5;
+                    case PadButton.Back: return KeyCode.JoystickButton6;
+                    case PadButton.Start: return KeyCode.JoystickButton7;
+                    case PadButton.R3: return KeyCode.JoystickButton9;
+                    case PadButton.RightStickRot: return KeyCode.JoystickButton11;
+                    case PadButton.L3: return KeyCode.JoystickButton8;
+                    case PadButton.LeftStickRot: return KeyCode.JoystickButton10;
+                    default: return KeyCode.None;
+                }
+            }
         }
     }
 

@@ -1,13 +1,5 @@
 <Mod ID="EnemyPatrolMod">
   <Compatible>2.5.3</Compatible>
-  <Button Standard="F11" ID="LogKey">
-    <Name>
-      <EN>LogKey</EN>
-    </Name>
-    <Description>
-      <EN>LogKey</EN>
-    </Description>
-  </Button>
   <Name>
     <EN>EnemyPatrolMod</EN>
   </Name>
