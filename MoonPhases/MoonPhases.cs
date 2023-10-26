@@ -100,6 +100,10 @@ namespace MoonPhases
                 Components.LightSource.intensity = Mathf.Lerp(0f, Night.LightIntensity * Night.m_SanityLightIntensityMul, MoonVisibility * MoonLightIntensity);
             }
 
+            Logger.Log("Waning: " + waning);
+            Logger.Log("MoonPhase: " + MoonDay);
+            Logger.Log("MoonLightIntensity: " + MoonLightIntensity);
+
             int MoonPhase = MoonDay;
             Texture2D MoonTexture = MoonTextures[MoonPhase];
             Components.MoonRenderer.material.SetTexture("_MainTex", MoonTexture);

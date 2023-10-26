@@ -44,15 +44,11 @@ namespace ModifyNutritionRate
             m_proteinFatIncreaseFactor = 0.25f;
             m_proteinCarboIncreaseFactor = 0.25f;
 
-            m_CarboFactor = 0.05f;
-            m_FatFactor = 0.04f;
-            m_ProteinsFactor = 0.04f;
+            m_CarboFactor = 0.033f;
+            m_FatFactor = 0.03f;
+            m_ProteinsFactor = 0.03f;
             m_HydrationFactor = 0.04f;
 
-            Log("m_MaxHydration: " + m_MaxHydration);
-            Log("m_HydrationConsumptionPerSecond: " + m_HydrationConsumptionPerSecond);
-            Log("m_HydrationConsumptionRunMul: " + m_HydrationConsumptionRunMul);
-            Log("m_HydrationConsumptionDuringFeverPerSecond: " + m_HydrationConsumptionDuringFeverPerSecond);
             Log("Initialized.");
     }
 

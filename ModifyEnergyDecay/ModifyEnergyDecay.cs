@@ -10,7 +10,7 @@ namespace ModifyEnergyDecay
         public override void Initialize(Being being)
         {
             CJDebug.Log("Updating Energy Consumption Per Second.");
-            base.m_EnergyConsumptionPerSecond = 0.05f;
+            base.m_EnergyConsumptionPerSecond = 0.03f;
 
             base.Initialize(being);
         }
