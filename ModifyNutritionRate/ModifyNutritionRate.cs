@@ -27,7 +27,7 @@ namespace ModifyNutritionRate
         private float m_fatCarboIncreaseFactor;
         private float m_proteinFatIncreaseFactor;
         private float m_proteinCarboIncreaseFactor;
-        private float m_MaxHydrationDecreaseFactor;
+        public static float m_MaxHydrationDecreaseFactor;
 
         public override void Initialize(Being being)
         {
@@ -216,7 +216,7 @@ namespace ModifyNutritionRate
 
         protected override void UpdateMaxHP()
         {
-            this.m_MaxHP = this.m_Hydration * 0.25f * this.m_MaxHydrationDecreaseFactor + this.m_NutritionFat * 0.25f + this.m_NutritionCarbo * 0.25f + this.m_NutritionProteins * 0.25f;
+            this.m_MaxHP = this.m_Hydration * 0.25f * m_MaxHydrationDecreaseFactor + this.m_NutritionFat * 0.25f + this.m_NutritionCarbo * 0.25f + this.m_NutritionProteins * 0.25f;
             this.m_MaxHP = Mathf.Clamp(this.m_MaxHP, 0f, 100f);
         }
 
@@ -309,7 +309,6 @@ namespace ModifyNutritionRate
 
         private void Log(string log)
         {
-            //CJDebug.Log("ModifyNutritionRate: " + log);
             ModAPI.Log.Write("ModifyNutritionRate: " + log);
         }
     }
@@ -318,15 +317,11 @@ namespace ModifyNutritionRate
     {
         protected override void UpdateSleeping()
         {
-            CJDebug.Log("UpdateSleeping ");
-
             base.UpdateSleeping();
 
             ModifyNutritionRate modifyNutritionRate = (ModifyNutritionRate)ModifyNutritionRate.Get();
 
-            float sleepCarboSpeedFactor = 1f, sleepFatSpeedFactor = 30f, sleepProteinsSpeedFactor = 30f, sleepHydrationSpeedFactor = 0.3f;
-
-            CJDebug.Log("" + modifyNutritionRate.GetProteinsDecrease() * sleepProteinsSpeedFactor);
+            float sleepCarboSpeedFactor = 1f, sleepFatSpeedFactor = 20f, sleepProteinsSpeedFactor = 20f, sleepHydrationSpeedFactor = 0.3f;
 
             modifyNutritionRate.m_NutritionCarbo -= modifyNutritionRate.GetCarboDecrease() * sleepCarboSpeedFactor;
             modifyNutritionRate.m_NutritionCarbo = Mathf.Clamp(modifyNutritionRate.m_NutritionCarbo, 0f, modifyNutritionRate.GetMaxNutritionCarbo());
@@ -370,7 +365,7 @@ namespace ModifyNutritionRate
             {
                 return;
             }
-            if (PlayerConditionModule.Get().GetHydration() >= (PlayerConditionModule.Get().GetMaxHydration() / 4f))
+            if (PlayerConditionModule.Get().GetHydration() >= (PlayerConditionModule.Get().GetMaxHydration() / ModifyNutritionRate.m_MaxHydrationDecreaseFactor))
             {
                 this.m_NextCheckWaterTime = Time.time + 5f;
                 return;
