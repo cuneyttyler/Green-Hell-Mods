@@ -24,25 +24,58 @@ namespace ModifyNutritionRate
         private float m_FatFactor;
         private float m_ProteinsFactor;
         private float m_HydrationFactor;
-        private float m_fatCarboIncreaseFactor;
-        private float m_proteinFatIncreaseFactor;
-        private float m_proteinCarboIncreaseFactor;
-        public static float m_MaxHydrationDecreaseFactor;
+        private float m_FatCarboIncreaseFactor;
+        private float m_ProteinFatIncreaseFactor;
+        private float m_ProteinCarboIncreaseFactor;
+        private float m_EnergyIncreaseFactor;
+        private float m_MaxCarboDecreaseFactor;
+        private float m_MaxFatDecreaseFactor;
+        private float m_MaxProteinDecreaseFactor;
+        private float m_MaxHydrationDecreaseFactor;
 
         public override void Initialize(Being being)
         {
             base.Initialize(being);
 
+            m_MaxCarboDecreaseFactor = 3f;
+            m_MaxFatDecreaseFactor = 3f;
+            m_MaxProteinDecreaseFactor = 3f;
             m_MaxHydrationDecreaseFactor = 4f;
+            m_EnergyIncreaseFactor = 0.33f;
+
+            m_MaxNutritionCarbo /= m_MaxCarboDecreaseFactor;
+            m_NutritionCarbohydratesConsumptionPerSecond /= m_MaxCarboDecreaseFactor;
+            m_NutritionCarbohydratesConsumptionActionMul /= m_MaxCarboDecreaseFactor;
+            m_NutritionCarbohydratesConsumptionRunMul /= m_MaxCarboDecreaseFactor;
+            m_NutritionCarbohydratesConsumptionWeightCriticalMul /= m_MaxCarboDecreaseFactor;
+            m_NutritionCarbohydratesConsumptionWeightNormalMul /= m_MaxCarboDecreaseFactor;
+            m_NutritionCarbohydratesConsumptionWeightOverloadMul /= m_MaxCarboDecreaseFactor;
+
+            m_MaxNutritionFat /= m_MaxFatDecreaseFactor;
+            m_NutritionFatConsumptionPerSecond /= m_MaxFatDecreaseFactor;
+            m_NutritionFatConsumptionActionMul /= m_MaxFatDecreaseFactor;
+            m_NutritionFatConsumptionMulNoCarbs /= m_MaxFatDecreaseFactor;
+            m_NutritionFatConsumptionWeightCriticalMul /= m_MaxFatDecreaseFactor;
+            m_NutritionFatConsumptionWeightNormalMul /= m_MaxFatDecreaseFactor;
+            m_NutritionFatConsumptionWeightOverloadMul /= m_MaxFatDecreaseFactor;
+
+            m_MaxNutritionProteins /= m_MaxProteinDecreaseFactor;
+            m_NutritionProteinsConsumptionPerSecond /= m_MaxProteinDecreaseFactor;
+            m_NutritionProteinsConsumptionActionMul /= m_MaxProteinDecreaseFactor;
+            m_NutritionProteinsConsumptionMulNoCarbs /= m_MaxProteinDecreaseFactor;
+            m_NutritionProteinsConsumptionRunMul /= m_MaxProteinDecreaseFactor;
+            m_NutritionProteinsConsumptionWeightCriticalMul /= m_MaxProteinDecreaseFactor;
+            m_NutritionProteinsConsumptionWeightNormalMul /= m_MaxProteinDecreaseFactor;
+            m_NutritionProteinsConsumptionWeightOverloadMul /= m_MaxProteinDecreaseFactor;
 
             m_MaxHydration /= m_MaxHydrationDecreaseFactor;
             m_HydrationConsumptionPerSecond /= (m_MaxHydrationDecreaseFactor * 1.5f);
             m_HydrationConsumptionRunMul /= (m_MaxHydrationDecreaseFactor * 1.5f);
             m_HydrationConsumptionDuringFeverPerSecond /= (m_MaxHydrationDecreaseFactor * 1.5f);
 
-            m_fatCarboIncreaseFactor = 0.5f;
-            m_proteinFatIncreaseFactor = 0.25f;
-            m_proteinCarboIncreaseFactor = 0.25f;
+            m_FatCarboIncreaseFactor = 0.5f;
+            m_ProteinFatIncreaseFactor = 0.25f;
+            m_ProteinCarboIncreaseFactor = 0.25f;
 
             m_CarboFactor = 0.033f;
             m_FatFactor = 0.03f;
@@ -50,7 +83,17 @@ namespace ModifyNutritionRate
             m_HydrationFactor = 0.04f;
 
             Log("Initialized.");
-    }
+        }
+
+        protected override void UpdateEnergy()
+        {
+            base.UpdateEnergy();
+
+            if(GetNutritionPercentage(0) > 70 && GetNutritionPercentage(1) > 70 && GetNutritionPercentage(2) > 70 && GetHydrationPercentage() > 30)
+            {
+                m_Energy += m_EnergyConsumptionPerSecond * m_EnergyIncreaseFactor;
+            }
+        }
 
         protected override void UpdateNutrition()
         {
@@ -359,13 +402,48 @@ namespace ModifyNutritionRate
 
     public class RemindersManagerExtended : RemindersManager
     {
+        protected override void CheckFood()
+        {
+            if (Time.time < m_NextCheckFoodTime)
+            {
+                return;
+            }
+
+            if (PlayerConditionModule.Get().GetNutritionFat() < PlayerConditionModule.Get().GetMaxNutritionFat() / 4f && PlayerConditionModule.Get().GetNutritionCarbo() < PlayerConditionModule.Get().GetMaxNutritionCarbo() / 4f && PlayerConditionModule.Get().GetNutritionProtein() < PlayerConditionModule.Get().GetMaxNutritionProtein() / 4f)
+            {
+                if (DialogsManager.Get().IsAnyDialogPlaying())
+                {
+                    m_NextCheckFoodTime = Time.time + 60f;
+                    return;
+                }
+
+                DialogsManager.Get().StartDialog(m_LowFoodDialogs[m_CheckFoodIndex]);
+                if (m_CheckFoodIndex == 0)
+                {
+                    HintsManager.Get().ShowHint(m_LowFoodHint);
+                }
+
+                m_CheckFoodIndex++;
+                if (m_CheckFoodIndex >= m_LowFoodDialogs.Length)
+                {
+                    m_CheckFoodIndex = 0;
+                }
+
+                m_NextCheckFoodTime = Time.time + 120f;
+            }
+            else
+            {
+                m_NextCheckFoodTime = Time.time + 5f;
+            }
+        }
+
         protected override void CheckWater()
         {
             if (Time.time < this.m_NextCheckWaterTime)
             {
                 return;
             }
-            if (PlayerConditionModule.Get().GetHydration() >= (PlayerConditionModule.Get().GetMaxHydration() / ModifyNutritionRate.m_MaxHydrationDecreaseFactor))
+            if (PlayerConditionModule.Get().GetHydration() >= (PlayerConditionModule.Get().GetMaxHydration() / 4f))
             {
                 this.m_NextCheckWaterTime = Time.time + 5f;
                 return;
