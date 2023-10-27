@@ -37,9 +37,9 @@ namespace ModifyNutritionRate
         {
             base.Initialize(being);
 
-            m_MaxCarboDecreaseFactor = 3f;
-            m_MaxFatDecreaseFactor = 3f;
-            m_MaxProteinDecreaseFactor = 3f;
+            m_MaxCarboDecreaseFactor = 2f;
+            m_MaxFatDecreaseFactor = 2f;
+            m_MaxProteinDecreaseFactor = 2f;
             m_MaxHydrationDecreaseFactor = 4f;
             m_EnergyIncreaseFactor = 0.33f;
 
@@ -77,9 +77,9 @@ namespace ModifyNutritionRate
             m_ProteinFatIncreaseFactor = 0.25f;
             m_ProteinCarboIncreaseFactor = 0.25f;
 
-            m_CarboFactor = 0.033f;
-            m_FatFactor = 0.03f;
-            m_ProteinsFactor = 0.03f;
+            m_CarboFactor = 0.04f;
+            m_FatFactor = 0.035f;
+            m_ProteinsFactor = 0.035f;
             m_HydrationFactor = 0.04f;
 
             Log("Initialized.");
@@ -259,7 +259,7 @@ namespace ModifyNutritionRate
 
         protected override void UpdateMaxHP()
         {
-            this.m_MaxHP = this.m_Hydration * 0.25f * m_MaxHydrationDecreaseFactor + this.m_NutritionFat * 0.25f + this.m_NutritionCarbo * 0.25f + this.m_NutritionProteins * 0.25f;
+            this.m_MaxHP = this.m_Hydration * 0.25f * m_MaxHydrationDecreaseFactor + this.m_NutritionFat * 0.25f * m_MaxFatDecreaseFactor + this.m_NutritionCarbo * 0.25f * m_MaxCarboDecreaseFactor + this.m_NutritionProteins * 0.25f * m_MaxProteinDecreaseFactor;
             this.m_MaxHP = Mathf.Clamp(this.m_MaxHP, 0f, 100f);
         }
 

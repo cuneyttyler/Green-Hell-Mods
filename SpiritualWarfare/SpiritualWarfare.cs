@@ -37,12 +37,12 @@ namespace SpiritualWarfare
         public static String GLORIA_PATRI_RESOURCE_ID = "Jake_Gloria_Patri";
 
         private static AssetBundle ASSET_BUNDLE;
-        public static List<TransformData> transformData = new List<TransformData>();
-        private List<GameObject> totemObjects = new List<GameObject>();
-        public static bool isLastActionDestroy = false;
+        public static List<TransformData> TransformData = new List<TransformData>();
+        private List<GameObject> TotemObjects = new List<GameObject>();
+        public static bool IsLastActionDestroy = false;
 
-        public static bool prayerMode;
-        private Timer prayerTimer;
+        public static bool PrayerMode;
+        private Timer PrayerTimer;
 
         public static SpiritualWarfare Get()
         {
@@ -66,9 +66,9 @@ namespace SpiritualWarfare
 
         void InitData()
         {
-            transformData = new List<TransformData>();
-            totemObjects = new List<GameObject>();
-            prayerMode = false;
+            TransformData = new List<TransformData>();
+            TotemObjects = new List<GameObject>();
+            PrayerMode = false;
         }
 
         void LoadAssetBundle()
@@ -97,12 +97,14 @@ namespace SpiritualWarfare
         private void InitializeObjects()
         {
             Logger.Log("Initializing objects.");
-            Logger.Log("Building previously built totems." + transformData.Count + " in total.");
-            foreach (TransformData transformData in transformData)
+            Logger.Log("Building previously built totems." + TransformData.Count + " in total.");
+            foreach (TransformData transformData in TransformData)
             {
-                try {
+                try
+                {
                     BuildTotem(CROSS_RESOURCE_ID, transformData, false, false);
-                } catch (Exception e)
+                }
+                catch (Exception e)
                 {
                     Logger.LogError("Exception while building totem. " + e.ToString());
                 }
@@ -121,28 +123,38 @@ namespace SpiritualWarfare
                 KeyCode LB = KeyHelper.KeyFromPad(KeyHelper.PadButton.LB);
                 KeyCode RB = KeyHelper.KeyFromPad(KeyHelper.PadButton.RB);
 
-                if (Input.GetKeyDown(Button_X) || Input.GetKeyDown(Button_Y)
-                    || Input.GetKeyDown(Button_A) || Input.GetKeyDown(Button_B))
+                if (Input.GetKeyDown(Button_Y) || Input.GetKeyDown(Button_A) || Input.GetKeyDown(Button_B))
                 {
                     EnterPrayerMode();
-                    Inventory3DManager.Get().enabled = false;
+                    DisableInventory();
                 }
 
-                if (Input.GetKeyUp(Button_X) || Input.GetKeyUp(Button_Y)
-                    || Input.GetKeyUp(Button_A) || Input.GetKeyUp(Button_B))
+                if (Input.GetKeyUp(Button_Y) || Input.GetKeyUp(Button_A) || Input.GetKeyUp(Button_B))
                 {
                     QuitPrayerMode();
-                    Inventory3DManager.Get().enabled = true;
+                    EnableInventory();
+                }
+
+                if (Input.GetKeyDown(Button_X))
+                {
+
+                    SetButtonXDownTimer();
+                }
+
+                if (Input.GetKeyUp(Button_X))
+                {
+                    QuitPrayerMode();
+                    EnableInventory();
                 }
 
                 if (Input.GetKeyUp(RB))
                 {
-                    Inventory3DManager.Get().enabled = false;
+                    DisableInventory();
                 }
 
                 if (Input.GetKeyUp(RB))
                 {
-                    Inventory3DManager.Get().enabled = true;
+                    EnableInventory();
                 }
 
                 if (Input.GetKeyDown(KeyCode.T) || Input.GetKeyDown(RB))
@@ -192,6 +204,19 @@ namespace SpiritualWarfare
             }
         }
 
+        void SetButtonXDownTimer()
+        {
+            TimerCallback callback = ButtonXTimerFun;
+            new Timer(callback, null, 100, Timeout.Infinite);
+        }
+
+        void ButtonXTimerFun(object state)
+        {
+            Logger.Log("ButtonXTimer");
+            EnterPrayerMode();
+            DisableInventory();
+        }
+
         void BuildTotem(String item, TransformData transform = null, bool write = true, bool debug = false)
         {
             if (debug)
@@ -222,12 +247,12 @@ namespace SpiritualWarfare
 
             if (write)
             {
-                transformData.Add(new TransformData(position, rotation, new Vector3()));
+                TransformData.Add(new TransformData(position, rotation, new Vector3()));
             }
 
-            totemObjects.Add(prefab);
+            TotemObjects.Add(prefab);
 
-            isLastActionDestroy = false;
+            IsLastActionDestroy = false;
         }
 
         void DropAndDestroyLog(Item log)
@@ -253,18 +278,18 @@ namespace SpiritualWarfare
 
         void RevertLastBuild()
         {
-            if (isLastActionDestroy == true)
+            if (IsLastActionDestroy == true)
             {
                 return;
             }
-            isLastActionDestroy = true;
+            IsLastActionDestroy = true;
 
-            if (totemObjects.Count > 0)
+            if (TotemObjects.Count > 0)
             {
-                TransformData data = transformData[transformData.Count - 1];
+                TransformData data = TransformData[TransformData.Count - 1];
 
-                UnityEngine.Object.Destroy(totemObjects[totemObjects.Count - 1]);
-                transformData.RemoveAt(transformData.Count - 1);
+                UnityEngine.Object.Destroy(TotemObjects[TotemObjects.Count - 1]);
+                TransformData.RemoveAt(TransformData.Count - 1);
 
                 ItemsManager.Get().CreateItem(ItemID.Log, false, data.position, Quaternion.identity, false);
             }
@@ -305,11 +330,11 @@ namespace SpiritualWarfare
 
         void SetPrayerTimer(String path)
         {
-            TimerCallback callback = PrayerTimer;
-            prayerTimer = new Timer(callback, null, GetPrayerTime(path), Timeout.Infinite);
+            TimerCallback callback = PrayerTimerFun;
+            PrayerTimer = new Timer(callback, null, GetPrayerTime(path), Timeout.Infinite);
         }
 
-        void PrayerTimer(object state)
+        void PrayerTimerFun(object state)
         {
             StopLookController();
             QuitPrayerMode();
@@ -341,9 +366,9 @@ namespace SpiritualWarfare
 
         void DisableTimer()
         {
-            if(prayerTimer != null)
+            if (PrayerTimer != null)
             {
-                prayerTimer.Dispose();
+                PrayerTimer.Dispose();
             }
         }
 
@@ -364,27 +389,35 @@ namespace SpiritualWarfare
 
         void StartLookController()
         {
-            Logger.Log("Start Look Controller");
             Player.Get().StartController(PlayerControllerType.Look);
         }
 
         void StopLookController()
         {
-            Logger.Log("Stop Look Controller");
             Player.Get().StopController(PlayerControllerType.Look);
         }
 
         void EnterPrayerMode()
         {
-            prayerMode = true;
+            PrayerMode = true;
         }
 
         void QuitPrayerMode()
         {
-            if(!IsPrayerPlaying())
+            if (!IsPrayerPlaying())
             {
-                prayerMode = false;
+                PrayerMode = false;
             }
+        }
+
+        void EnableInventory()
+        {
+            Inventory3DManager.Get().enabled = true;
+        }
+
+        void DisableInventory()
+        {
+            Inventory3DManager.Get().enabled = false;
         }
 
         AudioClip LoadAudio(String path)
@@ -409,12 +442,13 @@ namespace SpiritualWarfare
     {
         public override void StartControllerInternal()
         {
-            if(SpiritualWarfare.prayerMode && m_ControllerToStart == PlayerControllerType.Watch)
+            if (SpiritualWarfare.PrayerMode && m_ControllerToStart == PlayerControllerType.Watch)
             {
                 Logger.Log("PrayerMode on. Not starting watch controller");
                 m_ControllerToStart = PlayerControllerType.Unknown;
                 return;
-            } else if (m_ControllerToStart == PlayerControllerType.Watch)
+            }
+            else if (m_ControllerToStart == PlayerControllerType.Watch)
             {
                 Logger.Log("Starting watch controller.");
             }
@@ -427,10 +461,10 @@ namespace SpiritualWarfare
     {
         public override void Activate()
         {
-            if(enabled)
+            if (enabled)
             {
                 base.Activate();
-            } 
+            }
         }
     }
 
@@ -462,7 +496,8 @@ namespace SpiritualWarfare
         {
             if (controller_type == InputsManager.PadControllerType.Ps4)
             {
-                switch(pad_button) {
+                switch (pad_button)
+                {
                     case PadButton.Button_X: return KeyCode.JoystickButton0;
                     case PadButton.Button_Y: return KeyCode.JoystickButton3;
                     case PadButton.Button_A: return KeyCode.JoystickButton1;
@@ -477,7 +512,8 @@ namespace SpiritualWarfare
                     case PadButton.LeftStickRot: return KeyCode.JoystickButton10;
                     default: return KeyCode.None;
                 }
-            } else
+            }
+            else
             {
                 switch (pad_button)
                 {
@@ -518,7 +554,7 @@ namespace SpiritualWarfare
             foreach (string filePath in files)
             {
                 string json = File.ReadAllText(filePath);
-                SpiritualWarfare.transformData.Add(JsonUtility.FromJson<TransformData>(json));
+                SpiritualWarfare.TransformData.Add(JsonUtility.FromJson<TransformData>(json));
             }
         }
 
@@ -549,7 +585,7 @@ namespace SpiritualWarfare
 
             Logger.Log("Writing data to files.");
             int i = 0;
-            foreach (TransformData data in SpiritualWarfare.transformData)
+            foreach (TransformData data in SpiritualWarfare.TransformData)
             {
                 string json = JsonUtility.ToJson(data);
                 string filePath = System.IO.Path.Combine(slotFolderPath, "transform_data_" + slotId + "_" + (i++) + ".json");
