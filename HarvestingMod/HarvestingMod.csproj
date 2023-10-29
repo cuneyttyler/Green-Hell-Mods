@@ -7,8 +7,8 @@
     <ProjectGuid>{53821041-E269-4717-BAED-3C9C6836E83F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SpiritualWarfare</RootNamespace>
-    <AssemblyName>SpiritualWarfare</AssemblyName>
+    <RootNamespace>HarvestingMod</RootNamespace>
+    <AssemblyName>HarvestingMod</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -328,7 +328,7 @@
 
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SpiritualWarfare.cs"  />
+    <Compile Include="HarvestingMod.cs"  />
 
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

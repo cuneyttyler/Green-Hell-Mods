@@ -420,7 +420,6 @@ namespace SmallTrapDestroyAnimal
 
                 if(type.IsSubclassOf(typeof(AISoundModule)) || type == typeof(AudioSource))
                 {
-                    Logger.Log("Destroying sound component.");
                     UnityEngine.Object.Destroy(components[i]);
                 }
             }

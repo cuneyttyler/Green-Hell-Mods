@@ -1,0 +1,6 @@
+D:\Programs\modapi\projects\GH\HarvestingMod\Mod\HarvestingMod.dll
+D:\Programs\modapi\projects\GH\HarvestingMod\Mod\HarvestingMod.pdb
+D:\Programs\modapi\projects\GH\HarvestingMod\obj\x86\Release\HarvestingMod.csproj.AssemblyReference.cache
+D:\Programs\modapi\projects\GH\HarvestingMod\obj\x86\Release\HarvestingMod.csproj.CoreCompileInputs.cache
+D:\Programs\modapi\projects\GH\HarvestingMod\obj\x86\Release\HarvestingMod.dll
+D:\Programs\modapi\projects\GH\HarvestingMod\obj\x86\Release\HarvestingMod.pdb

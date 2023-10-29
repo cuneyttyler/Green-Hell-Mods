@@ -1,0 +1,10 @@
+<Mod ID="HarvestingMod">
+  <Compatible>2.5.3</Compatible>
+  <Name>
+    <EN>HarvestingMod</EN>
+  </Name>
+  <Description>
+    <EN>HarvestingMod</EN>
+  </Description>
+  <Version>1.0.0.0</Version>
+</Mod>

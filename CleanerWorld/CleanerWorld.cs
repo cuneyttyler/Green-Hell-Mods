@@ -59,7 +59,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
     }
@@ -84,7 +84,7 @@ namespace CleanerWorld
                         main_obj_destroyed = true;
                     }
                     gameObject = balance_object.gameObject;
-                
+
                     bool flag = false;
                     foreach (string group in this.m_Groups.Keys)
                     {
@@ -109,7 +109,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
     }
@@ -128,7 +128,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
 
@@ -161,7 +161,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
 
@@ -199,7 +199,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
 
@@ -224,7 +224,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
     }
@@ -270,7 +270,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
     }
@@ -574,7 +574,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
 
@@ -614,7 +614,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
     }
@@ -639,7 +639,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
     }
@@ -663,7 +663,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
     }
@@ -672,7 +672,7 @@ namespace CleanerWorld
     {
         //public override void TryShit()
         //{
-        //    Debug.Log("Don't Try.");
+        //    Logger.Log("Don't Try.");
         //}
     }
 
@@ -844,7 +844,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
     }
@@ -938,7 +938,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
 
@@ -958,7 +958,7 @@ namespace CleanerWorld
             }
             catch (Exception ex)
             {
-                Debug.Log(ex.ToString());
+                Logger.Log(ex.ToString());
             }
         }
     }

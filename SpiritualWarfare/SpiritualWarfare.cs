@@ -206,15 +206,27 @@ namespace SpiritualWarfare
 
         void SetButtonXDownTimer()
         {
-            TimerCallback callback = ButtonXTimerFun;
+            TimerCallback callback = ButtonXDownTimerFun;
             new Timer(callback, null, 100, Timeout.Infinite);
         }
 
-        void ButtonXTimerFun(object state)
+        void ButtonXDownTimerFun(object state)
         {
-            Logger.Log("ButtonXTimer");
             EnterPrayerMode();
             DisableInventory();
+            SetButtonXUpTimer();
+        }
+
+        void SetButtonXUpTimer()
+        {
+            TimerCallback callback = ButtonXUpTimerFun;
+            new Timer(callback, null, 100, Timeout.Infinite);
+        }
+
+        void ButtonXUpTimerFun(object state)
+        {
+            QuitPrayerMode();
+            EnableInventory();
         }
 
         void BuildTotem(String item, TransformData transform = null, bool write = true, bool debug = false)
