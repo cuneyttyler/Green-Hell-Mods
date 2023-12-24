@@ -1,0 +1,6 @@
+D:\Programs\Modapi\projects\GH\WaharaNotHostile\obj\x86\Release\WaharaNotHostile.csproj.AssemblyReference.cache
+D:\Programs\Modapi\projects\GH\WaharaNotHostile\obj\x86\Release\WaharaNotHostile.csproj.CoreCompileInputs.cache
+D:\Programs\Modapi\projects\GH\WaharaNotHostile\Mod\WaharaNotHostile.dll
+D:\Programs\Modapi\projects\GH\WaharaNotHostile\Mod\WaharaNotHostile.pdb
+D:\Programs\Modapi\projects\GH\WaharaNotHostile\obj\x86\Release\WaharaNotHostile.dll
+D:\Programs\Modapi\projects\GH\WaharaNotHostile\obj\x86\Release\WaharaNotHostile.pdb

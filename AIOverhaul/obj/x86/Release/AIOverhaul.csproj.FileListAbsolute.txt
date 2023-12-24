@@ -1,0 +1,6 @@
+D:\Programs\Modapi\projects\GH\AIOverhaul\obj\x86\Release\AIOverhaul.csproj.AssemblyReference.cache
+D:\Programs\Modapi\projects\GH\AIOverhaul\obj\x86\Release\AIOverhaul.csproj.CoreCompileInputs.cache
+D:\Programs\Modapi\projects\GH\AIOverhaul\Mod\AIOverhaul.dll
+D:\Programs\Modapi\projects\GH\AIOverhaul\Mod\AIOverhaul.pdb
+D:\Programs\Modapi\projects\GH\AIOverhaul\obj\x86\Release\AIOverhaul.dll
+D:\Programs\Modapi\projects\GH\AIOverhaul\obj\x86\Release\AIOverhaul.pdb
